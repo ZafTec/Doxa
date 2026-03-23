@@ -43,11 +43,15 @@ func (c *CategoryRepository) GetById(categoryId uint64) (models.Category, error)
 	return category, nil
 }
 
-func (c *CategoryRepository) GetAll(categoryId uint64) ([]models.Category, error) {
+func (c *CategoryRepository) GetAll() ([]models.Category, error) {
 	var categories []models.Category
-	result := c.connection.First(&categories, categoryId)
+	result := c.connection.Find(&categories)
 	if result.Error != nil {
 		return []models.Category{}, result.Error
 	}
 	return categories, nil
+}
+
+func CreateCategoryRepo(db *gorm.DB) ICategoryRepository {
+	return &CategoryRepository{db}
 }
