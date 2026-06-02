@@ -25,19 +25,19 @@ export function SiteSidebar() {
       />
       <aside
         className={
-          "fixed inset-y-0 left-0 z-40 w-64 transform border-r border-black/10 bg-[var(--background)] p-5 transition-transform dark:border-white/10 " +
+          "fixed inset-y-0 left-0 z-40 w-64 transform border-r border-border bg-background p-5 transition-transform " +
           (open ? "translate-x-0" : "-translate-x-full")
         }
       >
         <div className="mb-6 flex items-center justify-between">
-          <span className="font-mono text-xs tracking-wide uppercase opacity-60">
+          <span className="font-mono text-xs tracking-wide uppercase text-muted-foreground">
             Menu
           </span>
           <button
             type="button"
             onClick={() => setOpen(false)}
             aria-label="Close menu"
-            className="rounded-md px-2 py-1 text-sm hover:bg-black/5 dark:hover:bg-white/5"
+            className="rounded-md px-2 py-1 text-sm hover:bg-muted"
           >
             ✕
           </button>
@@ -47,7 +47,7 @@ export function SiteSidebar() {
             <a
               key={l.label}
               href={l.href}
-              className="rounded-md px-2 py-2 text-sm hover:bg-black/5 dark:hover:bg-white/5"
+              className="rounded-md px-2 py-2 text-sm hover:bg-muted"
             >
               {l.label}
             </a>
