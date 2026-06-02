@@ -50,9 +50,9 @@ Located in `lib/store/`.
 
 | Store             | Purpose                                       | Persisted? |
 | ----------------- | --------------------------------------------- | ---------- |
-| `useCartStore`    | Cart items, quantity ops, totals              | `localStorage` (`doxa.cart`) |
+| `useCartStore`    | Cart items, quantity ops, totals              | `localStorage` (`doxa.cart`) — full state |
 | `useSessionStore` | Hydrated user + `isAuthenticated` flag        | No — rehydrated from `/auth/me` |
-| `useUiStore`      | Theme, sidebar/drawer state                   | No (yet)   |
+| `useUiStore`      | Theme, sidebar/drawer state                   | `localStorage` (`doxa.ui`) — **only `theme`** via `partialize`; `sidebarOpen` is transient |
 
 Conventions:
 
@@ -65,6 +65,15 @@ Conventions:
 - `useZodForm(schema, options?)` in `lib/validation/use-zod-form.ts` — generic wrapper around `useForm` that wires `zodResolver` and defaults `mode: 'onTouched'`.
 - Shared schemas live in `lib/validation/schemas.ts`. Login/signup are present; address/checkout/payment schemas land when those flows do.
 - Zod v4 is in use — `ZodType<Output, Input>` ordering matters for resolver typing; do not change `useZodForm`'s generics without re-typechecking.
+
+## Design tokens & typography
+
+**All design tokens live in `app/globals.css`** — never inline hex values in components, never use `bg-[var(--background)]` arbitrary syntax.
+
+- Tokens are declared as CSS vars on `:root` (light) and `.dark` (dark mode), then exposed to Tailwind via `@theme inline`. Current semantic tokens: `background`, `foreground`, `muted`, `muted-foreground`, `border`, `accent`, `accent-foreground`. Use them through Tailwind utilities: `bg-background`, `text-foreground`, `border-border`, `bg-muted`, `text-muted-foreground`, `bg-accent text-accent-foreground`.
+- Manual dark mode is wired via `@custom-variant dark (&:where(.dark, .dark *))`. The `dark` class on `<html>` is toggled by (a) an inline `<head>` script that runs pre-paint to avoid FOUC, and (b) `ThemeEffect` which reaffirms after hydration and subscribes to `prefers-color-scheme` when `theme === "system"`.
+- **Typography:** primary is **Mona Sans** loaded via `next/font/google` (`Mona_Sans`) and exposed as `--font-sans`. Mono is **Geist Mono** as `--font-mono`. The Tailwind `--font-sans` / `--font-mono` chains add a professional system-UI fallback (`ui-sans-serif, system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif` and `ui-monospace, SFMono-Regular, Menlo, "Courier New", monospace`) so text stays sharp before the webfont arrives and on rendering failures.
+- To add a new token: declare it on `:root` and `.dark`, expose it under `@theme inline` (e.g. `--color-success: var(--success)`), then use `bg-success` etc. in components.
 
 ## Images & CDN
 
