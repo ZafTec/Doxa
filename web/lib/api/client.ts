@@ -11,21 +11,6 @@ export const apiClient: AxiosInstance = axios.create({
   timeout: 15_000,
 });
 
-apiClient.interceptors.request.use((config) => {
-  if (typeof window !== "undefined") {
-    try {
-      const raw = localStorage.getItem("doxa.auth");
-      if (raw) {
-        const token = JSON.parse(raw)?.state?.token as string | undefined;
-        if (token) config.headers.Authorization = `Bearer ${token}`;
-      }
-    } catch {
-      // ignore parse errors
-    }
-  }
-  return config;
-});
-
 apiClient.interceptors.response.use(
   (response) => response,
   (error: AxiosError<ApiErrorPayload>) => {
