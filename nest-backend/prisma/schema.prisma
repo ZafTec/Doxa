@@ -15,8 +15,8 @@ datasource db {
 }
 
 model Item {
-    id Int @id @default(autoincrement())
-    categoryId Int
+    id String @id @default(uuid())
+    categoryId String
     brand String
     description String
 
@@ -28,7 +28,7 @@ model Item {
 }
 
 model Category {
-    id Int @id @default(autoincrement())
+    id String @id @default(uuid())
     name String
     items Item[]
     createdAt DateTime @default(now())
