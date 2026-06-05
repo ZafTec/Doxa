@@ -2,6 +2,8 @@ import {BadRequestException, Get, Injectable} from '@nestjs/common';
 import {PrismaService} from "../prisma/prisma.service";
 import {type CreateItemDto, type ItemQueryDto} from "./item.schema";
 import type {Category, Item, Prisma} from "../../prisma/generated/client";
+import {getPage, PaginatedData, queryParameters} from "../shared/pagination";
+import {ItemWhereInput} from "../../prisma/generated/models/Item";
 // import type {Prisma} from "../../prisma/generated/client";
 
 @Injectable()
@@ -25,10 +27,21 @@ export class ItemService {
         return where;
     }
 
-    async getAll(filters: ItemQueryDto): Promise<Item[]>{
-        return this.prisma.item.findMany({
-            where: this.buildItemFilters(filters)
-        });
+    async getAll(queryParams: ItemQueryDto): Promise<PaginatedData<Item>>{
+
+        const page = getPage(queryParams.pageNumber, queryParams.pageSize);
+        const filters = this.buildItemFilters(queryParams);
+        const databaseQueryParameters=queryParameters<ItemWhereInput>(page, filters)
+
+        const totalCount = await this.prisma.item.count({where:databaseQueryParameters.where})
+        const data: Item[] = await this.prisma.item.findMany(databaseQueryParameters)
+
+        return {
+            data,
+            pageNumber: page.pageNum,
+            pageSize: page.pageSize,
+            totalCount
+        }
     }
 
     async createItem(item: CreateItemDto) {
