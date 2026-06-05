@@ -1,8 +1,8 @@
 import {BadRequestException, Get, Injectable} from '@nestjs/common';
 import {PrismaService} from "../prisma/prisma.service";
 import {type CreateItemDto, type ItemQueryDto} from "./item.schema";
-import type {Category, Item} from "../../prisma/generated/client";
-import type {Prisma} from "../../prisma/generated/client";
+import type {Category, Item, Prisma} from "../../prisma/generated/client";
+// import type {Prisma} from "../../prisma/generated/client";
 
 @Injectable()
 export class ItemService {
