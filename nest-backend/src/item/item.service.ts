@@ -1,4 +1,4 @@
-import {BadRequestException, Get, Injectable} from '@nestjs/common';
+import {BadRequestException, Get, Injectable, NotFoundException} from '@nestjs/common';
 import {PrismaService} from "../prisma/prisma.service";
 import {type CreateItemDto, type ItemQueryDto} from "./item.schema";
 import type {Category, Item, Prisma} from "../../prisma/generated/client";
@@ -56,5 +56,13 @@ export class ItemService {
 
         const createdItem: Item = await this.prisma.item.create({data: item})
         return createdItem;
+    }
+
+    async getItemById(id: string){
+        const item = await this.prisma.item.findUnique({where:{id:id}})
+        if (!item) {
+            throw new NotFoundException("Item not found");
+        }
+        return item
     }
 }

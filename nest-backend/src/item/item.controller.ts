@@ -1,4 +1,4 @@
-import {Body, Controller, Get, Post, UsePipes, Query} from '@nestjs/common';
+import {Body, Controller, Get, Post, UsePipes, Query, Param} from '@nestjs/common';
 import {ItemService} from "./item.service";
 import {ZodValidationPipe} from "nestjs-zod";
 import {type CreateItemDto, createItemSchema, getItemQuerySchema, type ItemQueryDto} from "./item.schema";
@@ -14,9 +14,12 @@ export class ItemController {
     async getAll(
         @Query(new ZodValidationPipe(getItemQuerySchema)) queryParams: ItemQueryDto
     ) {
-
-
         return this.itemService.getAll(queryParams)
+    }
+
+    @Get(':id')
+    async getById(@Param('id') id: string) {
+        return this.itemService.getItemById(id)
     }
 
     @Post('/create')
