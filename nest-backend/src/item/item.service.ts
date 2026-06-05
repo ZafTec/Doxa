@@ -1,10 +1,10 @@
-import {BadRequestException, Get, Injectable, NotFoundException} from '@nestjs/common';
+import {BadRequestException, Injectable, NotFoundException} from '@nestjs/common';
 import {PrismaService} from "../prisma/prisma.service";
 import {type CreateItemDto, type ItemQueryDto} from "./item.schema";
 import type {Category, Item, Prisma} from "../../prisma/generated/client";
-import {getPage, PaginatedData, queryParameters} from "../shared/pagination";
+import {getPage, queryParameters} from "../shared/pagination";
 import {ItemWhereInput} from "../../prisma/generated/models/Item";
-// import type {Prisma} from "../../prisma/generated/client";
+import {PaginatedData} from "../shared/shared.types";
 
 @Injectable()
 export class ItemService {
@@ -38,9 +38,11 @@ export class ItemService {
 
         return {
             data,
-            pageNumber: page.pageNum,
-            pageSize: page.pageSize,
-            totalCount
+            metadata: {
+                pageNumber: page.pageNum,
+                pageSize: page.pageSize,
+                totalCount
+            }
         }
     }
 

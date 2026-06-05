@@ -1,8 +1,8 @@
 export interface PaginatedData<T> {
     data: T[];
     metadata: {
-        offset: number;
-        take: number;
+        pageNumber: number;
+        pageSize: number;
         totalCount: number;
     }
 }
