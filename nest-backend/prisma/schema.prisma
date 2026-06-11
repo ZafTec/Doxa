@@ -22,7 +22,7 @@ model Item {
 
     // Relations
     category Category @relation(fields: [categoryId], references: [id])
-    itemVariant ItemVariant?
+    itemVariants ItemVariant[]
 
     createdAt DateTime @default(now())
     updatedAt DateTime @default(now())
@@ -38,10 +38,11 @@ model Category {
 
 model ItemVariant {
     id String @id @default(uuid())
-    itemId String @unique()
+    itemId String
     color String
     stockQuantity Int
     price Int
+    description String @default("Default Value")
 
     // Relations
     item Item @relation(fields:[itemId], references:[id])
