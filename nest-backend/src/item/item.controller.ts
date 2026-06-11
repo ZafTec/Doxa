@@ -25,13 +25,11 @@ export class ItemController {
 
     @Get(':id')
     async getById(@Param('id') id: string) {
-        console.log("The id is ",id)
         return this.itemService.getItemDetails(id)
     }
 
     @Get(':id/variant')
     async getVariant(@Param('id') id: string) {
-        console.log("I am in the variant part")
         return this.itemService.getItemListOfVariants(id)
     }
 
