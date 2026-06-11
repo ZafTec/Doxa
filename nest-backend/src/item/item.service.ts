@@ -1,14 +1,15 @@
 import {BadRequestException, Injectable, NotFoundException} from '@nestjs/common';
 import {PrismaService} from "../prisma/prisma.service";
-import {type CreateItemDto, type ItemQueryDto} from "./item.schema";
+import type { CreateItemDto, CreateItemVariantDto,  ItemQueryDto} from "./item.schema";
 import type {Category, Item, Prisma} from "../../prisma/generated/client";
 import {getPage, queryParameters} from "../shared/pagination";
 import {ItemWhereInput} from "../../prisma/generated/models/Item";
 import {PaginatedData} from "../shared/shared.types";
+import {AssetService} from "../asset/asset.service";
 
 @Injectable()
 export class ItemService {
-    constructor(private readonly prisma: PrismaService) {}
+    constructor(private readonly prisma: PrismaService, private readonly assetService: AssetService) {}
 
     private buildItemFilters(filters: ItemQueryDto): Prisma.ItemWhereInput {
         const where: Prisma.ItemWhereInput = {}
@@ -60,11 +61,71 @@ export class ItemService {
         return createdItem;
     }
 
-    async getItemById(id: string){
-        const item = await this.prisma.item.findUnique({where:{id:id}})
+    async getItem(id: string) {
+        const item = await this.prisma.item.findUnique({
+            where:{
+                id:id
+            },
+            include: {
+                itemVariants: {
+                    orderBy:{
+                        price: "asc"
+                    }
+                }
+            }
+        })
         if (!item) {
             throw new NotFoundException("Item not found");
         }
-        return item
+        return item;
+    }
+
+    async getItemDetails(id: string){
+
+        const item = await this.getItem(id)
+        const firstItemName = item.itemVariants.length > 0 ? item.itemVariants[0].name : "No name"
+        const firstItemVariantPrice = item.itemVariants.length > 0 ? item.itemVariants[0].price : 0
+        const firstItemVariantDescription = item.itemVariants.length > 0 ? item.itemVariants[0].description : item.description
+        const variants = await this.getItemListOfVariants(item.id)
+        const urls = item.itemVariants.length > 0 ? await this.assetService.fetchAssetByItemVariantId(item.itemVariants[0].id) : []
+        return {
+            variants:variants?.itemVariants,
+            price: firstItemVariantPrice,
+            description: firstItemVariantDescription,
+            assets: urls,
+            name: firstItemName
+
+        }
+    }
+
+    async getItemListOfVariants(id: string){
+        const item = await this.getItem(id)
+        const variants = await this.prisma.item.findUnique({
+            where:{
+                id: id
+            },
+            select:{
+                itemVariants: {
+                    select: {
+                        id: true,
+                        color:true,
+                        price: true,
+                    }
+                }
+            }
+        })
+        return variants;
+    }
+
+    async createItemVariant(itemVariant: CreateItemVariantDto){
+        const item = await this.prisma.item.findUnique({
+            where:{
+                id:itemVariant.itemId
+            }
+        })
+
+        return this.prisma.itemVariant.create({
+            data: itemVariant,
+        })
     }
 }
