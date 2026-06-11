@@ -46,4 +46,13 @@ model ItemVariant {
 
     // Relations
     item Item @relation(fields:[itemId], references:[id])
+    assets Asset[]
+}
+
+model Asset {
+    id String @id @default(uuid())
+    url String
+    itemVariantId String
+
+    itemVariant ItemVariant @relation(fields:[itemVariantId], references:[id])
 }
