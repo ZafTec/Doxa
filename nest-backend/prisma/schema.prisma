@@ -43,6 +43,7 @@ model ItemVariant {
     stockQuantity Int
     price Int
     description String @default("Default Value")
+    name String @default("Does not have a name")
 
     // Relations
     item Item @relation(fields:[itemId], references:[id])
