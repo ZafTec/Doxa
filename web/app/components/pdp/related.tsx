@@ -13,11 +13,13 @@ export function Related({ items }: { items: Item[] }) {
       <div className="grid grid-cols-2 gap-8 lg:grid-cols-4">
         {items.slice(0, 4).map((item) => {
           const price = minPrice(item);
+          const heroAsset = item.itemVariants?.[0]?.assets?.[0]?.url;
           return (
             <Link key={item.id} href={`/watches/${item.id}`} className="group block">
               <div className="mb-4 overflow-hidden">
                 <ProductImage
                   brand={item.brand}
+                  src={heroAsset}
                   className="transition-transform duration-500 group-hover:scale-[1.02]"
                 />
               </div>

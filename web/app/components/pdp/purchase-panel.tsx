@@ -2,31 +2,54 @@
 
 import { useMemo, useState } from "react";
 import { Minus, Plus } from "lucide-react";
-import type { Item, ItemVariant } from "@/lib/api";
+import type { ItemVariantSummary } from "@/lib/api";
 import { useCartStore, useUiStore } from "@/lib/store";
 import { formatPriceWithCurrencyLabel } from "@/lib/util/money";
-import { itemTitle, defaultVariant } from "@/lib/util/item";
 
-export function PurchasePanel({ item }: { item: Item }) {
-  const variants = useMemo(() => item.itemVariants ?? [], [item.itemVariants]);
-  const initial = defaultVariant(item);
+/**
+ * Props are taken from the PDP `ItemDetails` shape plus the item id and
+ * brand (for the cart snapshot). Keeps the panel decoupled from the
+ * narrower `Item` shape returned by the list endpoint.
+ */
+export type PurchasePanelProps = {
+  itemId: string;
+  brand: string;
+  name: string;
+  description: string;
+  price: number;
+  variants: ItemVariantSummary[];
+};
+
+export function PurchasePanel({
+  itemId,
+  brand,
+  name,
+  description,
+  price,
+  variants,
+}: PurchasePanelProps) {
+  const sorted = useMemo(
+    () => [...variants].sort((a, b) => a.price - b.price),
+    [variants],
+  );
+  const initial = sorted[0];
   const [selectedId, setSelectedId] = useState<string | undefined>(initial?.id);
   const [quantity, setQuantity] = useState(1);
   const add = useCartStore((s) => s.add);
   const openCart = useUiStore((s) => s.setCartOpen);
 
-  const selected = variants.find((v) => v.id === selectedId) ?? initial;
-
-  const canBuy = selected !== undefined && selected.stockQuantity > 0;
+  const selected = sorted.find((v) => v.id === selectedId) ?? initial;
+  const canBuy = selected !== undefined;
+  const displayPrice = selected?.price ?? price;
 
   function handleAdd() {
     if (!selected) return;
     add(
       {
         variantId: selected.id,
-        itemId: item.id,
-        brand: item.brand,
-        description: itemTitle(item),
+        itemId,
+        brand,
+        description: name,
         color: selected.color,
         unitPrice: selected.price,
       },
@@ -39,29 +62,21 @@ export function PurchasePanel({ item }: { item: Item }) {
     <section className="flex flex-col space-y-8">
       <div>
         <span className="mb-2 block text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground">
-          {item.brand}
+          {brand}
         </span>
         <h1 className="mb-2 text-[32px] font-semibold leading-tight tracking-tight md:text-[40px]">
-          {itemTitle(item)}
+          {name}
         </h1>
-        {item.category?.name && (
-          <p className="text-base text-muted-foreground">{item.category.name}</p>
-        )}
+        <p className="text-base text-muted-foreground">{description}</p>
       </div>
 
-      {selected ? (
-        <div className="text-2xl font-medium tabular-nums">
-          {formatPriceWithCurrencyLabel(selected.price)}
-        </div>
-      ) : (
-        <div className="text-sm uppercase tracking-[0.08em] text-muted-foreground">
-          Pricing arriving soon
-        </div>
-      )}
+      <div className="text-2xl font-medium tabular-nums">
+        {formatPriceWithCurrencyLabel(displayPrice)}
+      </div>
 
-      {variants.length > 0 && (
+      {sorted.length > 0 && (
         <VariantPicker
-          variants={variants}
+          variants={sorted}
           selectedId={selected?.id}
           onSelect={setSelectedId}
         />
@@ -96,7 +111,7 @@ export function PurchasePanel({ item }: { item: Item }) {
           disabled={!canBuy}
           className="h-14 w-full bg-accent text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
         >
-          {canBuy ? "Add to bag" : "Out of stock"}
+          {canBuy ? "Add to bag" : "Unavailable"}
         </button>
 
         <p className="pt-2 text-center text-xs text-muted-foreground">
@@ -112,7 +127,7 @@ function VariantPicker({
   selectedId,
   onSelect,
 }: {
-  variants: ItemVariant[];
+  variants: ItemVariantSummary[];
   selectedId: string | undefined;
   onSelect: (id: string) => void;
 }) {
@@ -126,19 +141,16 @@ function VariantPicker({
       <div className="flex flex-wrap gap-3">
         {variants.map((v) => {
           const isSelected = v.id === selectedId;
-          const out = v.stockQuantity <= 0;
           return (
             <button
               key={v.id}
               type="button"
               onClick={() => onSelect(v.id)}
-              disabled={out}
               className={
                 "flex items-center gap-2 border px-4 py-2 text-sm transition-colors " +
                 (isSelected
                   ? "border-accent bg-accent text-accent-foreground"
-                  : "border-border text-foreground hover:border-muted-foreground") +
-                (out ? " line-through opacity-50" : "")
+                  : "border-border text-foreground hover:border-muted-foreground")
               }
             >
               <span

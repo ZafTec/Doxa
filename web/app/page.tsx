@@ -1,6 +1,7 @@
-import { itemsApi } from "@/lib/api";
+import { categoriesApi, itemsApi } from "@/lib/api";
 import { HeroBand } from "./components/catalog/hero-band";
 import { FilterBar, type ActiveFilter } from "./components/catalog/filter-bar";
+import { FilterControls } from "./components/catalog/filter-controls";
 import { CatalogGrid } from "./components/catalog/catalog-grid";
 import { Pagination } from "./components/catalog/pagination";
 
@@ -18,18 +19,32 @@ export default async function HomePage({
   const brand = asCsv(sp.brand);
   const category = asCsv(sp.category);
 
-  const result = await itemsApi
-    .list({
-      brand,
-      category,
-      pageNumber: currentPage - 1,
-      pageSize: PAGE_SIZE,
-    })
-    .catch(() => null);
+  // Fetch catalog + categories in parallel; both feed UI controls.
+  const [result, categoryRows, allBrandsResult] = await Promise.all([
+    itemsApi
+      .list({
+        brand,
+        category,
+        pageNumber: currentPage - 1,
+        pageSize: PAGE_SIZE,
+      })
+      .catch(() => null),
+    categoriesApi.list().catch(() => []),
+    itemsApi.list({ pageSize: 100 }).catch(() => null),
+  ]);
 
   const items = result?.data ?? [];
   const totalCount = result?.metadata.totalCount ?? 0;
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+
+  const brandOptions = uniqueBrands(allBrandsResult?.data ?? []).map((b) => ({
+    value: b,
+    label: b,
+  }));
+  const categoryOptions = (categoryRows ?? []).map((c) => ({
+    value: c.name,
+    label: c.name,
+  }));
 
   const filters: ActiveFilter[] = [];
   if (brand?.length) {
@@ -54,6 +69,7 @@ export default async function HomePage({
   return (
     <>
       <HeroBand />
+      <FilterControls brands={brandOptions} categories={categoryOptions} />
       <FilterBar filters={filters} resultLabel={resultLabel} />
       <section className="mx-auto max-w-[1440px] px-6 py-16 md:px-12 lg:px-20">
         <CatalogGrid items={items} />
@@ -65,6 +81,12 @@ export default async function HomePage({
       />
     </>
   );
+}
+
+function uniqueBrands(items: Array<{ brand: string }>): string[] {
+  const set = new Set<string>();
+  for (const i of items) set.add(i.brand);
+  return [...set].sort();
 }
 
 function asString(v: string | string[] | undefined): string | undefined {

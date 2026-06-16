@@ -8,11 +8,14 @@ export function ProductCard({ item }: { item: Item }) {
   const title = itemTitle(item);
   const price = minPrice(item);
   const variants = item.itemVariants ?? [];
+  const heroAsset = variants[0]?.assets?.[0]?.url;
 
   return (
     <Link href={`/watches/${item.id}`} className="group block">
       <ProductImage
         brand={item.brand}
+        src={heroAsset}
+        alt={`${item.brand} ${title}`}
         className="transition-transform duration-500 group-hover:scale-[1.02]"
       />
 
@@ -50,10 +53,6 @@ export function ProductCard({ item }: { item: Item }) {
   );
 }
 
-/**
- * Map a variant's free-text color name to a CSS color. Falls back to the
- * raw value (so the backend can store hex), and finally to a neutral.
- */
 function cssColor(name: string): string {
   if (/^#[0-9a-f]{3,8}$/i.test(name)) return name;
   const map: Record<string, string> = {

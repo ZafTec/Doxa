@@ -1,15 +1,20 @@
-import type { Item, ItemVariant } from "@/lib/api";
+import type { ItemVariantSummary } from "@/lib/api";
 
-export function SpecList({ item, variant }: { item: Item; variant?: ItemVariant }) {
+export function SpecList({
+  brand,
+  variants,
+  selectedVariantId,
+}: {
+  brand: string;
+  variants: ItemVariantSummary[];
+  selectedVariantId?: string;
+}) {
+  const selected = variants.find((v) => v.id === selectedVariantId) ?? variants[0];
   const rows: Array<{ label: string; value: string }> = [];
-
-  if (item.category?.name) rows.push({ label: "Category", value: item.category.name });
-  rows.push({ label: "Brand", value: item.brand });
-  if (variant?.color) rows.push({ label: "Color", value: variant.color });
-  if (variant && variant.stockQuantity > 0) {
-    rows.push({ label: "Availability", value: `${variant.stockQuantity} in stock` });
-  } else if (variant) {
-    rows.push({ label: "Availability", value: "Out of stock" });
+  rows.push({ label: "Brand", value: brand });
+  if (selected?.color) rows.push({ label: "Color", value: selected.color });
+  if (variants.length > 1) {
+    rows.push({ label: "Variants", value: `${variants.length} colorways` });
   }
 
   if (rows.length === 0) return null;

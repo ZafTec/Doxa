@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
 import { ApiError, itemsApi } from "@/lib/api";
-import { defaultVariant } from "@/lib/util/item";
 import { Breadcrumbs } from "@/app/components/pdp/breadcrumbs";
 import { Gallery } from "@/app/components/pdp/gallery";
 import { PurchasePanel } from "@/app/components/pdp/purchase-panel";
@@ -12,22 +11,33 @@ type Params = Promise<{ id: string }>;
 export default async function ProductPage({ params }: { params: Params }) {
   const { id } = await params;
 
-  const item = await itemsApi.byId(id).catch((err) => {
-    if (err instanceof ApiError && err.status === 404) return null;
-    throw err;
-  });
+  // The list endpoint carries brand/category context that ItemDetails
+  // drops — we lightly cross-reference by filtering for the same id so
+  // breadcrumbs and the cart snapshot have a brand to show.
+  const [details, listForContext] = await Promise.all([
+    itemsApi.details(id).catch((err) => {
+      if (err instanceof ApiError && err.status === 404) return null;
+      throw err;
+    }),
+    itemsApi
+      .list({ pageSize: 100 })
+      .then((res) => res.data.find((i) => i.id === id))
+      .catch(() => undefined),
+  ]);
 
-  if (!item) notFound();
+  if (!details) notFound();
 
-  const variant = defaultVariant(item);
+  const brand = listForContext?.brand ?? "Doxa";
+  const categoryName = listForContext?.category?.name;
+  const variants = details.variants?.itemVariants ?? [];
 
   const related = await itemsApi
     .list({
-      brand: item.brand ? [item.brand] : undefined,
+      brand: listForContext?.brand ? [listForContext.brand] : undefined,
       pageNumber: 0,
       pageSize: 5,
     })
-    .then((res) => res.data.filter((i) => i.id !== item.id).slice(0, 4))
+    .then((res) => res.data.filter((i) => i.id !== id).slice(0, 4))
     .catch(() => []);
 
   return (
@@ -35,18 +45,25 @@ export default async function ProductPage({ params }: { params: Params }) {
       <Breadcrumbs
         crumbs={[
           { label: "Watches", href: "/" },
-          ...(item.category?.name
-            ? [{ label: item.category.name, href: `/?category=${encodeURIComponent(item.category.name)}` }]
+          ...(categoryName
+            ? [{ label: categoryName, href: `/?category=${encodeURIComponent(categoryName)}` }]
             : []),
-          { label: item.brand },
+          { label: brand },
         ]}
       />
 
       <div className="grid grid-cols-1 gap-16 lg:grid-cols-[60%_40%] lg:gap-24">
-        <Gallery brand={item.brand} />
+        <Gallery brand={brand} assets={details.assets} />
         <div className="space-y-12">
-          <PurchasePanel item={item} />
-          <SpecList item={item} variant={variant} />
+          <PurchasePanel
+            itemId={id}
+            brand={brand}
+            name={details.name}
+            description={details.description}
+            price={details.price}
+            variants={variants}
+          />
+          <SpecList brand={brand} variants={variants} />
         </div>
       </div>
 
