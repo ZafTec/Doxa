@@ -91,19 +91,39 @@ export class ItemService {
 
     async getItemDetails(id: string){
 
-        const item = await this.getItem(id)
+        const item = await this.prisma.item.findUnique({
+            where: { id },
+            include: {
+                category: true,
+                itemVariants: {
+                    orderBy: { price: "asc" },
+                },
+            },
+        })
+        if (!item) {
+            throw new NotFoundException("Item not found");
+        }
+
         const firstItemName = item.itemVariants.length > 0 ? item.itemVariants[0].name : "No name"
         const firstItemVariantPrice = item.itemVariants.length > 0 ? item.itemVariants[0].price : 0
         const firstItemVariantDescription = item.itemVariants.length > 0 ? item.itemVariants[0].description : item.description
-        const variants = await this.getItemListOfVariants(item.id)
         const urls = item.itemVariants.length > 0 ? await this.assetService.fetchAssetByItemVariantId(item.itemVariants[0].id) : []
         return {
-            variants:variants?.itemVariants,
+            id: item.id,
+            brand: item.brand,
+            category: item.category,
+            variants: {
+                itemVariants: item.itemVariants.map((v) => ({
+                    id: v.id,
+                    color: v.color,
+                    price: v.price,
+                    stockQuantity: v.stockQuantity,
+                })),
+            },
             price: firstItemVariantPrice,
             description: firstItemVariantDescription,
             assets: urls,
-            name: firstItemName
-
+            name: firstItemName,
         }
     }
 
@@ -119,6 +139,7 @@ export class ItemService {
                         id: true,
                         color:true,
                         price: true,
+                        stockQuantity: true,
                     }
                 }
             }
