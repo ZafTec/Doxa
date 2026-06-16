@@ -72,26 +72,6 @@ export class ItemService {
 
     async getItem(id: string) {
         const item = await this.prisma.item.findUnique({
-            where:{
-                id:id
-            },
-            include: {
-                itemVariants: {
-                    orderBy:{
-                        price: "asc"
-                    }
-                }
-            }
-        })
-        if (!item) {
-            throw new NotFoundException("Item not found");
-        }
-        return item;
-    }
-
-    async getItemDetails(id: string){
-
-        const item = await this.prisma.item.findUnique({
             where: { id },
             include: {
                 category: true,
@@ -103,6 +83,11 @@ export class ItemService {
         if (!item) {
             throw new NotFoundException("Item not found");
         }
+        return item;
+    }
+
+    async getItemDetails(id: string){
+        const item = await this.getItem(id)
 
         const firstItemName = item.itemVariants.length > 0 ? item.itemVariants[0].name : "No name"
         const firstItemVariantPrice = item.itemVariants.length > 0 ? item.itemVariants[0].price : 0
@@ -125,26 +110,6 @@ export class ItemService {
             assets: urls,
             name: firstItemName,
         }
-    }
-
-    async getItemListOfVariants(id: string){
-        const item = await this.getItem(id)
-        const variants = await this.prisma.item.findUnique({
-            where:{
-                id: id
-            },
-            select:{
-                itemVariants: {
-                    select: {
-                        id: true,
-                        color:true,
-                        price: true,
-                        stockQuantity: true,
-                    }
-                }
-            }
-        })
-        return variants;
     }
 
     async createItemVariant(itemVariant: CreateItemVariantDto){

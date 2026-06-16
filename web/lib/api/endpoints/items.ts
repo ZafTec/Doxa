@@ -6,14 +6,12 @@ import type {
   Item,
   ItemDetails,
   ItemListQuery,
-  ItemVariantSummary,
   Paginated,
 } from "./types";
 
 export const itemTags = {
   all: "items",
   byId: (id: string) => `item:${id}`,
-  variantsByItem: (id: string) => `item:${id}:variants`,
 } as const;
 
 function toQueryString(q: ItemListQuery = {}): string {
@@ -42,15 +40,6 @@ export const itemsApi = {
       revalidate: opts?.revalidate ?? 60,
       tags: [itemTags.all, itemTags.byId(id)],
     }),
-
-  variants: (id: string, opts?: { revalidate?: number | false }) =>
-    serverApi.get<{ itemVariants: ItemVariantSummary[] } | null>(
-      `/item/${id}/variant`,
-      {
-        revalidate: opts?.revalidate ?? 60,
-        tags: [itemTags.variantsByItem(id)],
-      },
-    ),
 
   create: (payload: CreateItemPayload) =>
     serverApi.post<Item>("/item/create", payload),
