@@ -2,18 +2,18 @@ import "server-only";
 import { serverApi } from "../server";
 import type {
   CreateItemPayload,
+  CreateItemVariantPayload,
   Item,
+  ItemDetails,
   ItemListQuery,
+  ItemVariantSummary,
   Paginated,
 } from "./types";
 
-/**
- * Cache tags for `revalidateTag` from webhooks / admin actions.
- * Re-export so route handlers can invalidate without knowing the strings.
- */
 export const itemTags = {
   all: "items",
   byId: (id: string) => `item:${id}`,
+  variantsByItem: (id: string) => `item:${id}:variants`,
 } as const;
 
 function toQueryString(q: ItemListQuery = {}): string {
@@ -33,12 +33,28 @@ export const itemsApi = {
       tags: [itemTags.all],
     }),
 
-  byId: (id: string, opts?: { revalidate?: number | false }) =>
-    serverApi.get<Item>(`/item/${id}`, {
+  /**
+   * PDP read. Returns the flattened `ItemDetails` shape that the backend
+   * builds from the item's first variant + full variant list + assets.
+   */
+  details: (id: string, opts?: { revalidate?: number | false }) =>
+    serverApi.get<ItemDetails>(`/item/${id}`, {
       revalidate: opts?.revalidate ?? 60,
       tags: [itemTags.all, itemTags.byId(id)],
     }),
 
+  variants: (id: string, opts?: { revalidate?: number | false }) =>
+    serverApi.get<{ itemVariants: ItemVariantSummary[] } | null>(
+      `/item/${id}/variant`,
+      {
+        revalidate: opts?.revalidate ?? 60,
+        tags: [itemTags.variantsByItem(id)],
+      },
+    ),
+
   create: (payload: CreateItemPayload) =>
     serverApi.post<Item>("/item/create", payload),
+
+  createVariant: (payload: CreateItemVariantPayload) =>
+    serverApi.post<unknown>("/item/createItemVariant", payload),
 };
