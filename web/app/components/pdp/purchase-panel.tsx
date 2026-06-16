@@ -13,6 +13,13 @@ export type PurchasePanelProps = {
   description: string;
   price: number;
   variants: ItemVariantSummary[];
+  /**
+   * Image URL snapshotted into the cart line. Today the backend's
+   * `ItemDetails.assets` only carries the first variant's images, so we
+   * use the same URL for any selected variant. TODO(media): fetch
+   * per-variant assets when the picker changes.
+   */
+  imageSrc?: string;
 };
 
 export function PurchasePanel({
@@ -22,6 +29,7 @@ export function PurchasePanel({
   description,
   price,
   variants,
+  imageSrc,
 }: PurchasePanelProps) {
   const sorted = useMemo(
     () => [...variants].sort((a, b) => a.price - b.price),
@@ -48,6 +56,7 @@ export function PurchasePanel({
         description: name,
         color: selected.color,
         unitPrice: selected.price,
+        image: imageSrc,
       },
       Math.min(quantity, maxQty),
     );

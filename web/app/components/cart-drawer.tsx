@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Minus, Plus, X } from "lucide-react";
 import { useCartStore, useUiStore, type CartLine } from "@/lib/store";
 import { formatPrice } from "@/lib/util/money";
+import { ProductImage } from "./product-image";
 
 export function CartDrawer() {
   const open = useUiStore((s) => s.cartOpen);
@@ -104,12 +105,24 @@ function EmptyCart() {
 function CartRow({ line }: { line: CartLine }) {
   const setQuantity = useCartStore((s) => s.setQuantity);
   const remove = useCartStore((s) => s.remove);
+  const lineTotal = line.unitPrice * line.quantity;
 
   return (
     <li className="flex gap-4 py-4">
-      <div className="size-20 shrink-0 bg-muted" aria-hidden>
-        {/* placeholder until backend serves media URLs */}
-      </div>
+      <Link
+        href={`/watches/${line.itemId}`}
+        aria-label={`Open ${line.brand} ${line.description}`}
+        className="block size-20 shrink-0"
+      >
+        <ProductImage
+          brand={line.brand}
+          src={line.image}
+          placeholderKey={line.itemId}
+          alt={`${line.brand} ${line.description}`}
+          className="size-20"
+        />
+      </Link>
+
       <div className="flex flex-1 flex-col gap-1">
         <span className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
           {line.brand}
@@ -117,7 +130,7 @@ function CartRow({ line }: { line: CartLine }) {
         <span className="text-sm font-medium leading-tight">{line.description}</span>
         <span className="text-xs text-muted-foreground">{line.color}</span>
 
-        <div className="mt-2 flex items-center justify-between">
+        <div className="mt-2 flex items-end justify-between gap-3">
           <div className="flex h-8 items-center border border-border">
             <button
               type="button"
@@ -137,11 +150,20 @@ function CartRow({ line }: { line: CartLine }) {
               <Plus className="size-3" />
             </button>
           </div>
-          <span className="text-sm font-medium tabular-nums">
-            {formatPrice(line.unitPrice * line.quantity)}
-          </span>
+
+          <div className="flex flex-col items-end gap-0.5">
+            <span className="text-sm font-medium tabular-nums">
+              {formatPrice(line.unitPrice)}
+            </span>
+            {line.quantity > 1 && (
+              <span className="text-[10px] uppercase tracking-[0.08em] text-muted-foreground tabular-nums">
+                × {line.quantity} = {formatPrice(lineTotal)}
+              </span>
+            )}
+          </div>
         </div>
       </div>
+
       <button
         type="button"
         onClick={() => remove(line.variantId)}

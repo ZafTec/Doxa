@@ -57,6 +57,7 @@ export default async function ProductPage({ params }: { params: Params }) {
             description={details.description}
             price={details.price}
             variants={variants}
+            imageSrc={details.assets[0]}
           />
           <SpecList brand={details.brand} variants={variants} />
         </div>
