@@ -36,34 +36,44 @@ Ecommerce storefront. Watches first, additional categories later. Backend (separ
 - Next.js 16 changed `fetch` defaults: **fetch is NOT cached by default.** You must opt in with `cache: 'force-cache'` or `next: { revalidate }`. Our `serverFetch` always forwards `next: { revalidate, tags }` so callers stay explicit.
 - For authenticated SSR (e.g. account pages), read the request cookie via `cookies()` and pass it through `serverFetch(path, { cookie })`.
 
-## Auth
+## Auth — none in v1
 
-**Cookie-based session, set by the backend.** The web app never holds a bearer token in JS.
+Guest-only storefront. No login, no session cookie, no `useSessionStore`. Cart lives entirely in `localStorage`. Re-add when the backend grows an auth module and we wire a customer dashboard.
 
-- axios is configured with `withCredentials: true`; the browser sends the session cookie automatically.
-- `useSessionStore` holds the hydrated user (UI-only); it is rehydrated from `GET /auth/me` on app mount, not from `localStorage`.
-- Auth contract types live in `lib/api/endpoints/auth.ts` (`AuthUser`, `LoginPayload`, `SignupPayload`). The store imports from there to keep the API contract authoritative.
+`axios` is still configured with `withCredentials: true` so that flipping the switch later doesn't require touching the client.
+
+## Catalog data model (web view)
+
+Backend models are `Item`, `ItemVariant`, `Category` (see `nest-backend/prisma/schema.prisma`). **`Item` is a wrapper; `ItemVariant` is the product the shopper picks** (color, stock, price). The web mirrors them in `lib/api/endpoints/types.ts`.
+
+Frontend assumptions that the backend will catch up to:
+
+- **`Item.itemVariants: ItemVariant[]` (1:N).** The schema is currently `itemVariant ItemVariant?` (1:1 via `@unique` on `itemId`) but the frontend assumes 1:N because a watch model has multiple colorways. Backend will flip the schema to match.
+- **Controllers include relations.** `GET /item` and `GET /item/:id` need `include: { itemVariant: true, category: true }` to be useful — without that, responses contain no price, stock, or category. Listed as a backend TODO.
+- **No `name`, no `image` on Item.** The card title is `brand`; the subtitle is `description`. Images are placeholders until a `mediaUrl` column lands and we wire Cloudinary.
+- **`pageNumber` is 0-indexed** in `Paginated<T>.metadata`. URL params on web should map 1-indexed `?page=2` → backend `pageNumber=1`.
+- **Money is `Int` (minor units)** on `ItemVariant.price`. Web preserves this all the way through to `CartLine.unitPrice`. Never use floats.
 
 ## State management (Zustand)
 
 Located in `lib/store/`.
 
-| Store             | Purpose                                       | Persisted? |
-| ----------------- | --------------------------------------------- | ---------- |
-| `useCartStore`    | Cart items, quantity ops, totals              | `localStorage` (`doxa.cart`) — full state |
-| `useSessionStore` | Hydrated user + `isAuthenticated` flag        | No — rehydrated from `/auth/me` |
-| `useUiStore`      | Theme, sidebar/drawer state                   | `localStorage` (`doxa.ui`) — **only `theme`** via `partialize`; `sidebarOpen` is transient |
+| Store          | Purpose                       | Persisted? |
+| -------------- | ----------------------------- | ---------- |
+| `useCartStore` | Cart lines, totals, mutations | `localStorage` (`doxa.cart`) — `lines` only |
+| `useUiStore`   | Theme, sidebar/drawer state   | `localStorage` (`doxa.ui`) — **only `theme`**; `sidebarOpen` is transient |
 
 Conventions:
 
-- Money is stored as **minor units (integers)** on `CartItem.unitPrice`. Never use floats for money.
-- Persisted stores use `partialize` to avoid serializing derived selectors/methods.
-- New persisted keys must be namespaced under `doxa.<feature>`.
+- `CartLine` is a **snapshot** of a variant at add-to-cart time (brand/description/color/unitPrice). Catalog edits do not retroactively mutate the cart.
+- Money is **minor units (integers)** on `CartLine.unitPrice`.
+- Persisted stores use `partialize` to avoid serializing methods.
+- Persisted keys are namespaced under `doxa.<feature>`.
 
 ## Forms & validation
 
 - `useZodForm(schema, options?)` in `lib/validation/use-zod-form.ts` — generic wrapper around `useForm` that wires `zodResolver` and defaults `mode: 'onTouched'`.
-- Shared schemas live in `lib/validation/schemas.ts`. Login/signup are present; address/checkout/payment schemas land when those flows do.
+- Shared schemas live in `lib/validation/schemas.ts`. Login/signup are gone (no auth in v1); address/checkout/payment schemas land when those flows do.
 - Zod v4 is in use — `ZodType<Output, Input>` ordering matters for resolver typing; do not change `useZodForm`'s generics without re-typechecking.
 
 ## Design tokens & typography
@@ -88,12 +98,15 @@ web/
   app/                        Routes (App Router)
   lib/
     api/
-      client.ts               axios instance (cookie auth)
+      client.ts               axios instance (cookie-ready; auth off in v1)
       server.ts               server-side fetch wrapper (RSC)
       errors.ts               ApiError class
       types.ts                ApiResponse / ApiErrorPayload
-      endpoints/              Typed endpoint groups (auth.ts, ...)
-    store/                    Zustand stores (cart, session, ui)
+      endpoints/
+        types.ts              Item / ItemVariant / Category / Paginated<T>
+        items.ts              GET /item, GET /item/:id, POST /item/create
+        categories.ts         GET /category, POST /category/create
+    store/                    Zustand stores (cart, ui)
     validation/               useZodForm + shared zod schemas
 ```
 
@@ -105,6 +118,15 @@ web/
 
 ## Open questions / TODO
 
-- Add a `cloudinary` URL helper once `CLOUDINARY_CLOUD_NAME` is decided.
-- Wire `GET /auth/me` into a top-level `SessionHydrator` client component once the backend endpoint exists.
-- Decide whether to adopt TanStack Query for client-side cart sync polling; current default is "no, RSC + axios mutations are enough."
+**Backend-side (tracked here because the web blocks on them):**
+
+- `item.service.ts` queries must `include: { itemVariant: true, category: true }`. Without that, `GET /item` and `GET /item/:id` return rows with no price/stock/category and the catalog cannot render.
+- Schema: `itemVariant ItemVariant?` → `itemVariants ItemVariant[]` (remove `@unique` on `itemId`). Watches need multiple colorways.
+- Enable CORS for the web origin (no credentials needed since there's no auth in v1).
+- Add a `name`/`title` column to `Item` (or rely on `brand` + `description` as the title-subtitle pair). Decide.
+- Add a media model (`Media { id, itemId, url, alt, order }`) so the catalog can ship real images via Cloudinary.
+
+**Web-side:**
+
+- Cloudinary URL helper once `CLOUDINARY_CLOUD_NAME` is set.
+- Decide whether to adopt TanStack Query for client mutations later; current default is RSC reads + axios point mutations.

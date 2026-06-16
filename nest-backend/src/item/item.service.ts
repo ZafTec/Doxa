@@ -35,10 +35,19 @@ export class ItemService {
         const databaseQueryParameters=queryParameters<ItemWhereInput>(page, filters)
 
         const totalCount = await this.prisma.item.count({where:databaseQueryParameters.where})
-        const data: Item[] = await this.prisma.item.findMany(databaseQueryParameters)
+        const data = await this.prisma.item.findMany({
+            ...databaseQueryParameters,
+            include: {
+                category: true,
+                itemVariants: {
+                    orderBy: { price: "asc" },
+                    include: { assets: { select: { url: true } } },
+                },
+            },
+        })
 
         return {
-            data,
+            data: data as unknown as Item[],
             metadata: {
                 pageNumber: page.pageNum,
                 pageSize: page.pageSize,
@@ -63,16 +72,13 @@ export class ItemService {
 
     async getItem(id: string) {
         const item = await this.prisma.item.findUnique({
-            where:{
-                id:id
-            },
+            where: { id },
             include: {
+                category: true,
                 itemVariants: {
-                    orderBy:{
-                        price: "asc"
-                    }
-                }
-            }
+                    orderBy: { price: "asc" },
+                },
+            },
         })
         if (!item) {
             throw new NotFoundException("Item not found");
@@ -81,40 +87,29 @@ export class ItemService {
     }
 
     async getItemDetails(id: string){
-
         const item = await this.getItem(id)
+
         const firstItemName = item.itemVariants.length > 0 ? item.itemVariants[0].name : "No name"
         const firstItemVariantPrice = item.itemVariants.length > 0 ? item.itemVariants[0].price : 0
         const firstItemVariantDescription = item.itemVariants.length > 0 ? item.itemVariants[0].description : item.description
-        const variants = await this.getItemListOfVariants(item.id)
         const urls = item.itemVariants.length > 0 ? await this.assetService.fetchAssetByItemVariantId(item.itemVariants[0].id) : []
         return {
-            variants:variants?.itemVariants,
+            id: item.id,
+            brand: item.brand,
+            category: item.category,
+            variants: {
+                itemVariants: item.itemVariants.map((v) => ({
+                    id: v.id,
+                    color: v.color,
+                    price: v.price,
+                    stockQuantity: v.stockQuantity,
+                })),
+            },
             price: firstItemVariantPrice,
             description: firstItemVariantDescription,
             assets: urls,
-            name: firstItemName
-
+            name: firstItemName,
         }
-    }
-
-    async getItemListOfVariants(id: string){
-        const item = await this.getItem(id)
-        const variants = await this.prisma.item.findUnique({
-            where:{
-                id: id
-            },
-            select:{
-                itemVariants: {
-                    select: {
-                        id: true,
-                        color:true,
-                        price: true,
-                    }
-                }
-            }
-        })
-        return variants;
     }
 
     async createItemVariant(itemVariant: CreateItemVariantDto){
