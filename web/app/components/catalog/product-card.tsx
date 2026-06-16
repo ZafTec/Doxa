@@ -15,6 +15,7 @@ export function ProductCard({ item }: { item: Item }) {
       <ProductImage
         brand={item.brand}
         src={heroAsset}
+        placeholderKey={item.id}
         alt={`${item.brand} ${title}`}
         className="transition-transform duration-500 group-hover:scale-[1.02]"
       />

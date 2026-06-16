@@ -11,29 +11,19 @@ type Params = Promise<{ id: string }>;
 export default async function ProductPage({ params }: { params: Params }) {
   const { id } = await params;
 
-  // The list endpoint carries brand/category context that ItemDetails
-  // drops — we lightly cross-reference by filtering for the same id so
-  // breadcrumbs and the cart snapshot have a brand to show.
-  const [details, listForContext] = await Promise.all([
-    itemsApi.details(id).catch((err) => {
-      if (err instanceof ApiError && err.status === 404) return null;
-      throw err;
-    }),
-    itemsApi
-      .list({ pageSize: 100 })
-      .then((res) => res.data.find((i) => i.id === id))
-      .catch(() => undefined),
-  ]);
+  const details = await itemsApi.details(id).catch((err) => {
+    if (err instanceof ApiError && err.status === 404) return null;
+    throw err;
+  });
 
   if (!details) notFound();
 
-  const brand = listForContext?.brand ?? "Doxa";
-  const categoryName = listForContext?.category?.name;
   const variants = details.variants?.itemVariants ?? [];
+  const categoryName = details.category?.name;
 
   const related = await itemsApi
     .list({
-      brand: listForContext?.brand ? [listForContext.brand] : undefined,
+      brand: [details.brand],
       pageNumber: 0,
       pageSize: 5,
     })
@@ -46,24 +36,29 @@ export default async function ProductPage({ params }: { params: Params }) {
         crumbs={[
           { label: "Watches", href: "/" },
           ...(categoryName
-            ? [{ label: categoryName, href: `/?category=${encodeURIComponent(categoryName)}` }]
+            ? [
+                {
+                  label: categoryName,
+                  href: `/?category=${encodeURIComponent(categoryName)}`,
+                },
+              ]
             : []),
-          { label: brand },
+          { label: details.brand },
         ]}
       />
 
       <div className="grid grid-cols-1 gap-16 lg:grid-cols-[60%_40%] lg:gap-24">
-        <Gallery brand={brand} assets={details.assets} />
+        <Gallery brand={details.brand} assets={details.assets} placeholderKey={details.id} />
         <div className="space-y-12">
           <PurchasePanel
-            itemId={id}
-            brand={brand}
+            itemId={details.id}
+            brand={details.brand}
             name={details.name}
             description={details.description}
             price={details.price}
             variants={variants}
           />
-          <SpecList brand={brand} variants={variants} />
+          <SpecList brand={details.brand} variants={variants} />
         </div>
       </div>
 

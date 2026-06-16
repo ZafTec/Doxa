@@ -6,11 +6,6 @@ import type { ItemVariantSummary } from "@/lib/api";
 import { useCartStore, useUiStore } from "@/lib/store";
 import { formatPriceWithCurrencyLabel } from "@/lib/util/money";
 
-/**
- * Props are taken from the PDP `ItemDetails` shape plus the item id and
- * brand (for the cart snapshot). Keeps the panel decoupled from the
- * narrower `Item` shape returned by the list endpoint.
- */
 export type PurchasePanelProps = {
   itemId: string;
   brand: string;
@@ -32,18 +27,19 @@ export function PurchasePanel({
     () => [...variants].sort((a, b) => a.price - b.price),
     [variants],
   );
-  const initial = sorted[0];
+  const initial = sorted.find((v) => v.stockQuantity > 0) ?? sorted[0];
   const [selectedId, setSelectedId] = useState<string | undefined>(initial?.id);
   const [quantity, setQuantity] = useState(1);
   const add = useCartStore((s) => s.add);
   const openCart = useUiStore((s) => s.setCartOpen);
 
   const selected = sorted.find((v) => v.id === selectedId) ?? initial;
-  const canBuy = selected !== undefined;
+  const canBuy = selected !== undefined && selected.stockQuantity > 0;
   const displayPrice = selected?.price ?? price;
+  const maxQty = Math.min(99, selected?.stockQuantity ?? 99);
 
   function handleAdd() {
-    if (!selected) return;
+    if (!selected || !canBuy) return;
     add(
       {
         variantId: selected.id,
@@ -53,7 +49,7 @@ export function PurchasePanel({
         color: selected.color,
         unitPrice: selected.price,
       },
-      quantity,
+      Math.min(quantity, maxQty),
     );
     openCart(true);
   }
@@ -82,6 +78,14 @@ export function PurchasePanel({
         />
       )}
 
+      {selected && (
+        <p className="text-xs uppercase tracking-[0.08em] text-muted-foreground">
+          {selected.stockQuantity > 0
+            ? `${selected.stockQuantity} in stock`
+            : "Out of stock"}
+        </p>
+      )}
+
       <div className="flex flex-col space-y-4">
         <div className="flex h-14 w-fit items-center border border-border">
           <button
@@ -96,9 +100,9 @@ export function PurchasePanel({
           <span className="w-16 text-center text-sm font-medium tabular-nums">{quantity}</span>
           <button
             type="button"
-            onClick={() => setQuantity((q) => Math.min(99, q + 1))}
+            onClick={() => setQuantity((q) => Math.min(maxQty, q + 1))}
             aria-label="Increase quantity"
-            disabled={!canBuy}
+            disabled={!canBuy || quantity >= maxQty}
             className="flex h-full w-12 items-center justify-center border-l border-border transition-colors hover:bg-muted disabled:opacity-40"
           >
             <Plus className="size-4" />
@@ -111,7 +115,7 @@ export function PurchasePanel({
           disabled={!canBuy}
           className="h-14 w-full bg-accent text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
         >
-          {canBuy ? "Add to bag" : "Unavailable"}
+          {canBuy ? "Add to bag" : "Out of stock"}
         </button>
 
         <p className="pt-2 text-center text-xs text-muted-foreground">
@@ -141,16 +145,19 @@ function VariantPicker({
       <div className="flex flex-wrap gap-3">
         {variants.map((v) => {
           const isSelected = v.id === selectedId;
+          const out = v.stockQuantity <= 0;
           return (
             <button
               key={v.id}
               type="button"
               onClick={() => onSelect(v.id)}
+              disabled={out}
               className={
                 "flex items-center gap-2 border px-4 py-2 text-sm transition-colors " +
                 (isSelected
                   ? "border-accent bg-accent text-accent-foreground"
-                  : "border-border text-foreground hover:border-muted-foreground")
+                  : "border-border text-foreground hover:border-muted-foreground") +
+                (out ? " cursor-not-allowed line-through opacity-50" : "")
               }
             >
               <span

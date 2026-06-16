@@ -20,6 +20,7 @@ export function Related({ items }: { items: Item[] }) {
                 <ProductImage
                   brand={item.brand}
                   src={heroAsset}
+                  placeholderKey={item.id}
                   className="transition-transform duration-500 group-hover:scale-[1.02]"
                 />
               </div>

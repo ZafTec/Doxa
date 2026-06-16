@@ -44,6 +44,7 @@ export type ItemVariantSummary = {
   id: string;
   color: string;
   price: number;
+  stockQuantity: number;
 };
 
 export type Asset = {
@@ -68,9 +69,13 @@ export type Item = {
  * from the item's first variant. Fields are flattened for direct UI use:
  *   `name` / `description` / `price` come from the first variant.
  *   `assets` is the image URL list for the first variant.
- *   `variants` is the slim picker list (all variants).
+ *   `variants` is the slim picker list (all variants, with stock).
+ *   `brand` / `category` come from the parent Item.
  */
 export type ItemDetails = {
+  id: string;
+  brand: string;
+  category: Category | null;
   name: string;
   description: string;
   price: number;

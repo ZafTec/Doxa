@@ -1,12 +1,14 @@
 import Image from "next/image";
+import { fallbackPlaceholder } from "@/lib/placeholders/watches";
 
 /**
- * Square product image slot. Renders `next/image` with the supplied URL
- * when present; otherwise falls back to a faint brand initial on the
- * muted ground.
+ * Square product image slot. Prefers a real asset URL; otherwise renders
+ * a Stitch-generated placeholder image so the catalog/PDP stay visually
+ * complete in dev. Brand initial only renders as a last-resort tint over
+ * the placeholder.
  *
- * TODO(media): once backend asset URLs flow consistently through every
- * endpoint, drop the brand-initial fallback altogether.
+ * TODO(media): drop the Stitch placeholder once every Asset row carries
+ * a Cloudinary URL.
  */
 export function ProductImage({
   brand,
@@ -14,14 +16,17 @@ export function ProductImage({
   alt,
   priority,
   className = "",
+  placeholderKey,
 }: {
   brand: string;
   src?: string;
   alt?: string;
   priority?: boolean;
   className?: string;
+  /** Stable id used to pick a deterministic placeholder when `src` is missing. */
+  placeholderKey?: string;
 }) {
-  const initial = brand?.[0]?.toUpperCase() ?? "·";
+  const resolved = src ?? fallbackPlaceholder(placeholderKey ?? brand);
   const fallbackAlt = alt ?? `${brand} watch`;
 
   return (
@@ -31,24 +36,15 @@ export function ProductImage({
         className
       }
     >
-      {src ? (
-        <Image
-          src={src}
-          alt={fallbackAlt}
-          fill
-          sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
-          className="object-contain p-6"
-          priority={priority}
-          unoptimized
-        />
-      ) : (
-        <span
-          aria-hidden
-          className="select-none text-[120px] font-bold tracking-tighter text-foreground/[0.04]"
-        >
-          {initial}
-        </span>
-      )}
+      <Image
+        src={resolved}
+        alt={fallbackAlt}
+        fill
+        sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+        className="object-contain p-6"
+        priority={priority}
+        unoptimized
+      />
     </div>
   );
 }
