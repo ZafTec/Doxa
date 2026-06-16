@@ -2,7 +2,7 @@ import "server-only";
 import { ApiError } from "./errors";
 import type { ApiErrorPayload } from "./types";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000";
 
 export type ServerFetchOptions = Omit<RequestInit, "body"> & {
   body?: unknown;

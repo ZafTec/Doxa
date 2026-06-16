@@ -2,7 +2,7 @@ import axios, { AxiosError, type AxiosInstance, type AxiosRequestConfig } from "
 import { ApiError } from "./errors";
 import type { ApiErrorPayload } from "./types";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "/api";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000";
 
 export const apiClient: AxiosInstance = axios.create({
   baseURL: BASE_URL,

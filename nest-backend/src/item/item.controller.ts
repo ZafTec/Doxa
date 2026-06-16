@@ -28,11 +28,6 @@ export class ItemController {
         return this.itemService.getItemDetails(id)
     }
 
-    @Get(':id/variant')
-    async getVariant(@Param('id') id: string) {
-        return this.itemService.getItemListOfVariants(id)
-    }
-
     @Post('/create')
     async create(
         @Body(new ZodValidationPipe(createItemSchema)) item: CreateItemDto,

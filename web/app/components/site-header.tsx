@@ -1,44 +1,56 @@
 "use client";
 
-import { useUiStore, type UiState } from "@/lib/store";
+import Link from "next/link";
+import { Menu } from "lucide-react";
+import { useUiStore } from "@/lib/store";
+import { ThemeToggle } from "./theme-toggle";
+import { CartButton } from "./cart-button";
 
-const themes: UiState["theme"][] = ["light", "dark", "system"];
+const navLinks = [
+  { label: "Watches", href: "/" },
+  { label: "Collections", href: "/collections" },
+  { label: "Stories", href: "/stories" },
+];
 
 export function SiteHeader() {
   const toggleSidebar = useUiStore((s) => s.toggleSidebar);
-  const theme = useUiStore((s) => s.theme);
-  const setTheme = useUiStore((s) => s.setTheme);
 
   return (
-    <header className="sticky top-0 z-20 flex items-center justify-between border-b border-border bg-background/80 px-4 py-3 backdrop-blur">
-      <div className="flex items-center gap-3">
-        <button
-          type="button"
-          onClick={toggleSidebar}
-          aria-label="Toggle menu"
-          className="rounded-md border border-border px-2 py-1 text-sm hover:bg-muted"
-        >
-          ☰
-        </button>
-        <span className="font-mono text-sm tracking-wide uppercase">Doxa</span>
-      </div>
-
-      <div className="flex items-center gap-1 rounded-md border border-border p-0.5 text-xs">
-        {themes.map((t) => (
+    <header className="sticky top-0 z-30 h-16 border-b border-border bg-background/80 backdrop-blur">
+      <div className="mx-auto flex h-full max-w-[1440px] items-center justify-between px-6 md:px-12">
+        <div className="flex items-center gap-6">
           <button
-            key={t}
             type="button"
-            onClick={() => setTheme(t)}
-            className={
-              "rounded-sm px-2 py-1 capitalize transition " +
-              (theme === t
-                ? "bg-accent text-accent-foreground"
-                : "hover:bg-muted")
-            }
+            onClick={toggleSidebar}
+            aria-label="Open menu"
+            className="rounded p-2 text-foreground transition-colors hover:bg-muted"
           >
-            {t}
+            <Menu className="size-5" />
           </button>
-        ))}
+          <Link
+            href="/"
+            className="text-xl font-bold tracking-[0.2em] text-foreground"
+          >
+            DOXA
+          </Link>
+        </div>
+
+        <nav className="hidden items-center gap-8 md:flex">
+          {navLinks.map((link) => (
+            <Link
+              key={link.label}
+              href={link.href}
+              className="border-b border-transparent py-5 text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground"
+            >
+              {link.label}
+            </Link>
+          ))}
+        </nav>
+
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <CartButton />
+        </div>
       </div>
     </header>
   );
