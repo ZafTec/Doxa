@@ -35,10 +35,19 @@ export class ItemService {
         const databaseQueryParameters=queryParameters<ItemWhereInput>(page, filters)
 
         const totalCount = await this.prisma.item.count({where:databaseQueryParameters.where})
-        const data: Item[] = await this.prisma.item.findMany(databaseQueryParameters)
+        const data = await this.prisma.item.findMany({
+            ...databaseQueryParameters,
+            include: {
+                category: true,
+                itemVariants: {
+                    orderBy: { price: "asc" },
+                    include: { assets: { select: { url: true } } },
+                },
+            },
+        })
 
         return {
-            data,
+            data: data as unknown as Item[],
             metadata: {
                 pageNumber: page.pageNum,
                 pageSize: page.pageSize,
