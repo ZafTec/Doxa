@@ -57,3 +57,7 @@ model Asset {
 
     itemVariant ItemVariant @relation(fields:[itemVariantId], references:[id])
 }
+
+model Admin {
+    email String @id
+}
