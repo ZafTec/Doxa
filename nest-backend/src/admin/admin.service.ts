@@ -13,6 +13,9 @@ export class AdminService {
     }
 
     async redirectUrl(loginType: string){
+        if (loginType.toLowerCase() !== "google"){
+            throw new BadRequestException("Invalid Login Method")
+        }
         const clientId = process.env[`${loginType}_CLIENT_ID`]
         return {url:`https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=http://localhost:3000/oauth&response_type=code&scope=email`}
     }
