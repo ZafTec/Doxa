@@ -24,7 +24,7 @@ export class AdminService {
         try{
             const accessToken = await getGoogleAccessToken(code)
             const {email} = await getGoogleUser(accessToken)
-            const user =  await this.prismaService.user.findUnique({
+            const user =  await this.prismaService.admin.findUnique({
                 where: {
                     email: email
                 }
