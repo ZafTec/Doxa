@@ -10,7 +10,7 @@ export async function getGoogleAccessToken(code: string): Promise<string> {
     params.append("client_secret", process.env["GOOGLE_CLIENT_SECRET"] ?? "");
     params.append("grant_type", "authorization_code");
     params.append("code", code);
-    params.append("redirect_uri", "http://localhost:3000/oauth");
+    params.append("redirect_uri", process.env["GOOGLE_REDIRECT_URL"] ?? "");
 
     const resp = await fetch("https://oauth2.googleapis.com/token", {
         method: "POST",
