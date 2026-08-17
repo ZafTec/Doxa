@@ -7,12 +7,16 @@ export { itemsApi, itemTags } from "./endpoints/items";
 export { categoriesApi, categoryTags } from "./endpoints/categories";
 export { assetsApi, assetTags } from "./endpoints/assets";
 export type {
+  AdminRole,
+  AdminUser,
   Asset,
   Category,
+  CreateAdminUserPayload,
   CreateAssetPayload,
   CreateCategoryPayload,
   CreateItemPayload,
   CreateItemVariantPayload,
+  CurrentAdmin,
   ISODateString,
   Item,
   ItemDetails,
@@ -20,4 +24,5 @@ export type {
   ItemVariant,
   ItemVariantSummary,
   Paginated,
+  UpdateAdminUserRolePayload,
 } from "./endpoints/types";

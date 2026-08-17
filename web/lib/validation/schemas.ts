@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 /**
- * Shared zod schemas. Authentication schemas were removed — v1 ships as a
+ * Shared zod schemas. Authentication schemas were removed - v1 ships as a
  * guest-only storefront. Re-add login/signup when the backend grows an auth
  * module and we wire a customer dashboard.
  */

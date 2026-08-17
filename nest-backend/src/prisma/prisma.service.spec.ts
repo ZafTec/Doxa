@@ -1,6 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from './prisma.service';
 
+process.env.DATABASE_URL ??=
+  'postgresql://postgres:postgres@localhost:5432/doxa';
+
 describe('PrismaService', () => {
   let service: PrismaService;
 

@@ -1,12 +1,12 @@
 <!-- BEGIN:nextjs-agent-rules -->
 # This is NOT the Next.js you know
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
+This version has breaking changes - APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
 <!-- END:nextjs-agent-rules -->
 
 ---
 
-# Doxa Web — Architecture & Conventions
+# Doxa Web - Architecture & Conventions
 
 This file is the canonical memory for the `web/` package. Update it whenever a decision below changes.
 
@@ -19,7 +19,7 @@ Ecommerce storefront. Watches first, additional categories later. Backend (separ
 | Concern        | Choice                                    |
 | -------------- | ----------------------------------------- |
 | Framework      | Next.js 16 (App Router), React 19         |
-| Package mgr    | **bun** — always prefer `bun add`, `bunx` |
+| Package mgr    | **bun** - always prefer `bun add`, `bunx` |
 | Styling        | Tailwind v4 (`@tailwindcss/postcss`)      |
 | State (client) | Zustand                                   |
 | Forms          | react-hook-form + zod (`@hookform/resolvers/zod`) |
@@ -27,20 +27,42 @@ Ecommerce storefront. Watches first, additional categories later. Backend (separ
 | HTTP (server)  | native `fetch` (Next-extended)            |
 | Images         | `next/image` + Cloudinary                 |
 
-## Data fetching — read this before writing any fetch code
+## Data fetching - read this before writing any fetch code
 
 **Default to Server Components for reads.** Catalog/category/PDP data is fetched on the server with `lib/api/server.ts` so the HTML ships cached and there is no client waterfall.
 
-- Server fetches: `serverApi.get<T>(path, { revalidate, tags })` — wraps `fetch` with `next: { revalidate, tags }`. Tag every collection so we can invalidate via `revalidateTag` from webhooks/admin actions.
+- Server fetches: `serverApi.get<T>(path, { revalidate, tags })` - wraps `fetch` with `next: { revalidate, tags }`. Tag every collection so we can invalidate via `revalidateTag` from webhooks/admin actions.
 - Client mutations & authenticated reads-from-client: `lib/api/client.ts` (axios with `withCredentials: true`).
 - Next.js 16 changed `fetch` defaults: **fetch is NOT cached by default.** You must opt in with `cache: 'force-cache'` or `next: { revalidate }`. Our `serverFetch` always forwards `next: { revalidate, tags }` so callers stay explicit.
 - For authenticated SSR (e.g. account pages), read the request cookie via `cookies()` and pass it through `serverFetch(path, { cookie })`.
 
-## Auth — none in v1
+## Auth
 
-Guest-only storefront. No login, no session cookie, no `useSessionStore`. Cart lives entirely in `localStorage`. Re-add when the backend grows an auth module and we wire a customer dashboard.
+The storefront itself is still guest-only in v1: no customer login, no `useSessionStore`. Cart lives entirely in `localStorage`.
 
-`axios` is still configured with `withCredentials: true` so that flipping the switch later doesn't require touching the client.
+**Admin auth exists** (`app/admin/`), separate from the storefront: Google OAuth only, no
+passwords. Admins are an allowlist - a Google sign-in only succeeds if the email already
+exists as an `AdminUser` row on the backend (added via `/admin/users/new`, SUPER_ADMIN
+only). Session is a single httpOnly JWT cookie (`access_token`, ~7 days) set by
+`nest-backend`'s `/auth/google/callback`; there's no refresh-token flow - the backend
+re-reads the `AdminUser` row on every request instead, so revoking access or changing a
+role takes effect on the admin's next request.
+
+- `app/admin/login` - plain link to `${NEXT_PUBLIC_API_URL}/auth/google` (full navigation,
+  not axios - OAuth needs a real browser redirect chain).
+- `app/admin/(protected)/layout.tsx` - the auth gate. Forwards the request's `Cookie`
+  header to `GET /auth/me`; redirects to `/admin/login` on failure. Must stay a sibling of
+  (not a parent of) `app/admin/login` or the redirect loops.
+- `middleware.ts` - cheap defense-in-depth only (redirects when the `access_token` cookie
+  is absent); it does not verify the JWT. Real auth is the layout above.
+- Reads: `lib/api/endpoints/auth.ts` / `admin-users.ts` (`server-only`, forward the cookie
+  explicitly - these are NOT in the shared `lib/api` barrel to avoid poisoning client
+  bundles). Mutations: `*-client.ts` siblings (`auth-client.ts`, `items-client.ts`,
+  `categories-client.ts`, `admin-users-client.ts`) using `lib/api/client.ts`'s axios
+  instance - the browser attaches the httpOnly cookie automatically, no manual forwarding
+  needed.
+
+`axios` (`lib/api/client.ts`) is configured with `withCredentials: true` for this reason.
 
 ## Catalog data model (web view)
 
@@ -49,7 +71,7 @@ Backend models are `Item`, `ItemVariant`, `Category` (see `nest-backend/prisma/s
 Frontend assumptions that the backend will catch up to:
 
 - **`Item.itemVariants: ItemVariant[]` (1:N).** The schema is currently `itemVariant ItemVariant?` (1:1 via `@unique` on `itemId`) but the frontend assumes 1:N because a watch model has multiple colorways. Backend will flip the schema to match.
-- **Controllers include relations.** `GET /item` and `GET /item/:id` need `include: { itemVariant: true, category: true }` to be useful — without that, responses contain no price, stock, or category. Listed as a backend TODO.
+- **Controllers include relations.** `GET /item` and `GET /item/:id` need `include: { itemVariant: true, category: true }` to be useful - without that, responses contain no price, stock, or category. Listed as a backend TODO.
 - **No `name`, no `image` on Item.** The card title is `brand`; the subtitle is `description`. Images are placeholders until a `mediaUrl` column lands and we wire Cloudinary.
 - **`pageNumber` is 0-indexed** in `Paginated<T>.metadata`. URL params on web should map 1-indexed `?page=2` → backend `pageNumber=1`.
 - **Money is `Int` (minor units)** on `ItemVariant.price`. Web preserves this all the way through to `CartLine.unitPrice`. Never use floats.
@@ -60,8 +82,8 @@ Located in `lib/store/`.
 
 | Store          | Purpose                       | Persisted? |
 | -------------- | ----------------------------- | ---------- |
-| `useCartStore` | Cart lines, totals, mutations | `localStorage` (`doxa.cart`) — `lines` only |
-| `useUiStore`   | Theme, sidebar/drawer state   | `localStorage` (`doxa.ui`) — **only `theme`**; `sidebarOpen` is transient |
+| `useCartStore` | Cart lines, totals, mutations | `localStorage` (`doxa.cart`) - `lines` only |
+| `useUiStore`   | Theme, sidebar/drawer state   | `localStorage` (`doxa.ui`) - **only `theme`**; `sidebarOpen` is transient |
 
 Conventions:
 
@@ -72,13 +94,13 @@ Conventions:
 
 ## Forms & validation
 
-- `useZodForm(schema, options?)` in `lib/validation/use-zod-form.ts` — generic wrapper around `useForm` that wires `zodResolver` and defaults `mode: 'onTouched'`.
+- `useZodForm(schema, options?)` in `lib/validation/use-zod-form.ts` - generic wrapper around `useForm` that wires `zodResolver` and defaults `mode: 'onTouched'`.
 - Shared schemas live in `lib/validation/schemas.ts`. Login/signup are gone (no auth in v1); address/checkout/payment schemas land when those flows do.
-- Zod v4 is in use — `ZodType<Output, Input>` ordering matters for resolver typing; do not change `useZodForm`'s generics without re-typechecking.
+- Zod v4 is in use - `ZodType<Output, Input>` ordering matters for resolver typing; do not change `useZodForm`'s generics without re-typechecking.
 
 ## Design tokens & typography
 
-**All design tokens live in `app/globals.css`** — never inline hex values in components, never use `bg-[var(--background)]` arbitrary syntax.
+**All design tokens live in `app/globals.css`** - never inline hex values in components, never use `bg-[var(--background)]` arbitrary syntax.
 
 - Tokens are declared as CSS vars on `:root` (light) and `.dark` (dark mode), then exposed to Tailwind via `@theme inline`. Current semantic tokens: `background`, `foreground`, `muted`, `muted-foreground`, `border`, `accent`, `accent-foreground`. Use them through Tailwind utilities: `bg-background`, `text-foreground`, `border-border`, `bg-muted`, `text-muted-foreground`, `bg-accent text-accent-foreground`.
 - Manual dark mode is wired via `@custom-variant dark (&:where(.dark, .dark *))`. The `dark` class on `<html>` is toggled by (a) an inline `<head>` script that runs pre-paint to avoid FOUC, and (b) `ThemeEffect` which reaffirms after hydration and subscribes to `prefers-color-scheme` when `theme === "system"`.
@@ -89,32 +111,42 @@ Conventions:
 
 - Cloudinary is the canonical image host. Configured via `images.remotePatterns` in `next.config.ts` for `https://res.cloudinary.com/**`.
 - `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` will hold the account name when set up; URL building helpers go in `lib/cloudinary/` when needed.
-- Always use `next/image` for product imagery — never raw `<img>`.
+- Always use `next/image` for product imagery - never raw `<img>`.
 
 ## Project layout
 
 ```
 web/
-  app/                        Routes (App Router)
+  middleware.ts                Admin route cookie-presence check (see Auth section)
+  app/
+    (storefront)/               Guest-only storefront, wrapped in SiteHeader/Sidebar/Cart/Footer
+      page.tsx, watches/[id]/
+    admin/                       Admin panel - no storefront chrome
+      login/                      Public: Google sign-in link
+      (protected)/                 Auth-gated via layout.tsx -> GET /auth/me
+        page.tsx, items/, categories/, users/
+      components/                  AdminShell, AdminNav, LogoutButton, form-field helpers
   lib/
     api/
-      client.ts               axios instance (cookie-ready; auth off in v1)
+      client.ts               axios instance (cookie-ready, withCredentials: true)
       server.ts               server-side fetch wrapper (RSC)
       errors.ts               ApiError class
       types.ts                ApiResponse / ApiErrorPayload
       endpoints/
-        types.ts              Item / ItemVariant / Category / Paginated<T>
-        items.ts              GET /item, GET /item/:id, POST /item/create
-        categories.ts         GET /category, POST /category/create
+        types.ts              Item / ItemVariant / Category / AdminUser / Paginated<T>
+        items.ts, categories.ts        Public reads + provisional serverApi creates (server-only)
+        items-client.ts, categories-client.ts   Client-side creates used by admin forms
+        auth.ts, admin-users.ts        Admin reads, server-only, cookie forwarded explicitly
+        auth-client.ts, admin-users-client.ts    Admin mutations via client.ts axios
     store/                    Zustand stores (cart, ui)
-    validation/               useZodForm + shared zod schemas
+    validation/               useZodForm + shared zod schemas + admin-schemas.ts
 ```
 
 ## Commit & workflow conventions
 
 - One-line, imperative commit subjects. No co-author trailers requested by the repo owner.
 - Commit per logical step rather than batching unrelated changes.
-- Run `bunx tsc --noEmit` before committing; the dev server is usually already running in another terminal — do not start a new one.
+- Run `bunx tsc --noEmit` before committing; the dev server is usually already running in another terminal - do not start a new one.
 
 ## Open questions / TODO
 

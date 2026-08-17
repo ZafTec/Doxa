@@ -1,9 +1,9 @@
 import { categoriesApi, itemsApi } from "@/lib/api";
-import { HeroBand } from "./components/catalog/hero-band";
-import { FilterBar, type ActiveFilter } from "./components/catalog/filter-bar";
-import { FilterControls } from "./components/catalog/filter-controls";
-import { CatalogGrid } from "./components/catalog/catalog-grid";
-import { Pagination } from "./components/catalog/pagination";
+import { HeroBand } from "@/app/components/catalog/hero-band";
+import { FilterBar, type ActiveFilter } from "@/app/components/catalog/filter-bar";
+import { FilterControls } from "@/app/components/catalog/filter-controls";
+import { CatalogGrid } from "@/app/components/catalog/catalog-grid";
+import { Pagination } from "@/app/components/catalog/pagination";
 
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 

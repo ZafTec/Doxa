@@ -1,6 +1,6 @@
 /**
  * Money helpers. All amounts are integers in minor units (e.g. cents).
- * Never accept floats — backend stores ItemVariant.price as `Int`.
+ * Never accept floats - backend stores ItemVariant.price as `Int`.
  */
 
 const DEFAULT_CURRENCY = "USD";

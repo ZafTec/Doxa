@@ -2,19 +2,16 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
-First, run the development server:
+Copy `.env.example` to `.env.local`, then make sure the NestJS API is running on port 3000.
+
+Install dependencies and start the development server:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+bun install
+bun run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3001](http://localhost:3001) with your browser. The frontend uses port 3001 so the API can consistently use port 3000.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 

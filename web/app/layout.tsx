@@ -2,10 +2,6 @@ import type { Metadata } from "next";
 import { Mona_Sans, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeEffect } from "./components/theme-effect";
-import { SiteHeader } from "./components/site-header";
-import { SiteSidebar } from "./components/site-sidebar";
-import { SiteFooter } from "./components/site-footer";
-import { CartDrawer } from "./components/cart-drawer";
 
 const monaSans = Mona_Sans({
   variable: "--font-sans",
@@ -20,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Doxa — Watches",
+  title: "Doxa - Watches",
   description: "Editorial watches storefront.",
 };
 
@@ -44,11 +40,7 @@ export default function RootLayout({
       </head>
       <body className="flex min-h-full flex-col">
         <ThemeEffect />
-        <SiteSidebar />
-        <CartDrawer />
-        <SiteHeader />
-        <main className="flex flex-1 flex-col">{children}</main>
-        <SiteFooter />
+        {children}
       </body>
     </html>
   );

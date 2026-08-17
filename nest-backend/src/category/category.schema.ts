@@ -1,7 +1,7 @@
-import {z} from "zod";
+import { z } from 'zod';
 
 export const createCategorySchema = z.object({
-    name: z.string(),
-})
+  name: z.string(),
+});
 
-export type CreateCategoryDto = z.infer<typeof createCategorySchema>
+export type CreateCategoryDto = z.infer<typeof createCategorySchema>;
