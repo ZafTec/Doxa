@@ -2,7 +2,7 @@
  * Backend-shaped domain types. Mirrors `nest-backend/prisma/schema.prisma`
  * and the response shapes returned by Nest controllers.
  *
- * IMPORTANT — Item vs ItemVariant:
+ * IMPORTANT - Item vs ItemVariant:
  *   Item is the wrapper (brand, top-level description, category). Variants
  *   carry the user-pickable axes: color, price, stock, plus their own
  *   marketing name + description, plus assets (image URLs).
@@ -65,7 +65,7 @@ export type Item = {
 };
 
 /**
- * Response shape returned by `GET /item/:id` — assembled by the backend
+ * Response shape returned by `GET /item/:id` - assembled by the backend
  * from the item's first variant. Fields are flattened for direct UI use:
  *   `name` / `description` / `price` come from the first variant.
  *   `assets` is the image URL list for the first variant.

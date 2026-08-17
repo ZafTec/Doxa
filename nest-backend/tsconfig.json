@@ -14,11 +14,6 @@
     "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": "./",
-    "paths": {
-      "@prisma/adapter-pg": [
-        "./node_modules/@prisma/adapter-pg/dist/index.d.ts"
-      ]
-    },
     "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": true,

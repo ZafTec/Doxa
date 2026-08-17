@@ -36,7 +36,7 @@ export async function serverFetch<T>(
     try {
       payload = (await response.json()) as ApiErrorPayload;
     } catch {
-      // ignore — body may not be JSON
+      // ignore - body may not be JSON
     }
     throw new ApiError(
       payload?.message ?? response.statusText,

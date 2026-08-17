@@ -8,7 +8,7 @@ import { persist, createJSONStorage } from "zustand/middleware";
  * change what's in someone's cart.
  *
  * `unitPrice` is in minor units (e.g. cents) per the money rule in
- * AGENTS.md — never floats.
+ * AGENTS.md - never floats.
  */
 export type CartLine = {
   variantId: string;

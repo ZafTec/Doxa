@@ -149,7 +149,7 @@ function VariantPicker({
   return (
     <div className="space-y-4">
       <label className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
-        Color — {selected?.color ?? "Select"}
+        Color - {selected?.color ?? "Select"}
       </label>
       <div className="flex flex-wrap gap-3">
         {variants.map((v) => {

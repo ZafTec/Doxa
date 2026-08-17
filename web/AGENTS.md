@@ -1,12 +1,12 @@
 <!-- BEGIN:nextjs-agent-rules -->
 # This is NOT the Next.js you know
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
+This version has breaking changes - APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
 <!-- END:nextjs-agent-rules -->
 
 ---
 
-# Doxa Web — Architecture & Conventions
+# Doxa Web - Architecture & Conventions
 
 This file is the canonical memory for the `web/` package. Update it whenever a decision below changes.
 
@@ -19,7 +19,7 @@ Ecommerce storefront. Watches first, additional categories later. Backend (separ
 | Concern        | Choice                                    |
 | -------------- | ----------------------------------------- |
 | Framework      | Next.js 16 (App Router), React 19         |
-| Package mgr    | **bun** — always prefer `bun add`, `bunx` |
+| Package mgr    | **bun** - always prefer `bun add`, `bunx` |
 | Styling        | Tailwind v4 (`@tailwindcss/postcss`)      |
 | State (client) | Zustand                                   |
 | Forms          | react-hook-form + zod (`@hookform/resolvers/zod`) |
@@ -27,16 +27,16 @@ Ecommerce storefront. Watches first, additional categories later. Backend (separ
 | HTTP (server)  | native `fetch` (Next-extended)            |
 | Images         | `next/image` + Cloudinary                 |
 
-## Data fetching — read this before writing any fetch code
+## Data fetching - read this before writing any fetch code
 
 **Default to Server Components for reads.** Catalog/category/PDP data is fetched on the server with `lib/api/server.ts` so the HTML ships cached and there is no client waterfall.
 
-- Server fetches: `serverApi.get<T>(path, { revalidate, tags })` — wraps `fetch` with `next: { revalidate, tags }`. Tag every collection so we can invalidate via `revalidateTag` from webhooks/admin actions.
+- Server fetches: `serverApi.get<T>(path, { revalidate, tags })` - wraps `fetch` with `next: { revalidate, tags }`. Tag every collection so we can invalidate via `revalidateTag` from webhooks/admin actions.
 - Client mutations & authenticated reads-from-client: `lib/api/client.ts` (axios with `withCredentials: true`).
 - Next.js 16 changed `fetch` defaults: **fetch is NOT cached by default.** You must opt in with `cache: 'force-cache'` or `next: { revalidate }`. Our `serverFetch` always forwards `next: { revalidate, tags }` so callers stay explicit.
 - For authenticated SSR (e.g. account pages), read the request cookie via `cookies()` and pass it through `serverFetch(path, { cookie })`.
 
-## Auth — none in v1
+## Auth - none in v1
 
 Guest-only storefront. No login, no session cookie, no `useSessionStore`. Cart lives entirely in `localStorage`. Re-add when the backend grows an auth module and we wire a customer dashboard.
 
@@ -49,7 +49,7 @@ Backend models are `Item`, `ItemVariant`, `Category` (see `nest-backend/prisma/s
 Frontend assumptions that the backend will catch up to:
 
 - **`Item.itemVariants: ItemVariant[]` (1:N).** The schema is currently `itemVariant ItemVariant?` (1:1 via `@unique` on `itemId`) but the frontend assumes 1:N because a watch model has multiple colorways. Backend will flip the schema to match.
-- **Controllers include relations.** `GET /item` and `GET /item/:id` need `include: { itemVariant: true, category: true }` to be useful — without that, responses contain no price, stock, or category. Listed as a backend TODO.
+- **Controllers include relations.** `GET /item` and `GET /item/:id` need `include: { itemVariant: true, category: true }` to be useful - without that, responses contain no price, stock, or category. Listed as a backend TODO.
 - **No `name`, no `image` on Item.** The card title is `brand`; the subtitle is `description`. Images are placeholders until a `mediaUrl` column lands and we wire Cloudinary.
 - **`pageNumber` is 0-indexed** in `Paginated<T>.metadata`. URL params on web should map 1-indexed `?page=2` → backend `pageNumber=1`.
 - **Money is `Int` (minor units)** on `ItemVariant.price`. Web preserves this all the way through to `CartLine.unitPrice`. Never use floats.
@@ -60,8 +60,8 @@ Located in `lib/store/`.
 
 | Store          | Purpose                       | Persisted? |
 | -------------- | ----------------------------- | ---------- |
-| `useCartStore` | Cart lines, totals, mutations | `localStorage` (`doxa.cart`) — `lines` only |
-| `useUiStore`   | Theme, sidebar/drawer state   | `localStorage` (`doxa.ui`) — **only `theme`**; `sidebarOpen` is transient |
+| `useCartStore` | Cart lines, totals, mutations | `localStorage` (`doxa.cart`) - `lines` only |
+| `useUiStore`   | Theme, sidebar/drawer state   | `localStorage` (`doxa.ui`) - **only `theme`**; `sidebarOpen` is transient |
 
 Conventions:
 
@@ -72,13 +72,13 @@ Conventions:
 
 ## Forms & validation
 
-- `useZodForm(schema, options?)` in `lib/validation/use-zod-form.ts` — generic wrapper around `useForm` that wires `zodResolver` and defaults `mode: 'onTouched'`.
+- `useZodForm(schema, options?)` in `lib/validation/use-zod-form.ts` - generic wrapper around `useForm` that wires `zodResolver` and defaults `mode: 'onTouched'`.
 - Shared schemas live in `lib/validation/schemas.ts`. Login/signup are gone (no auth in v1); address/checkout/payment schemas land when those flows do.
-- Zod v4 is in use — `ZodType<Output, Input>` ordering matters for resolver typing; do not change `useZodForm`'s generics without re-typechecking.
+- Zod v4 is in use - `ZodType<Output, Input>` ordering matters for resolver typing; do not change `useZodForm`'s generics without re-typechecking.
 
 ## Design tokens & typography
 
-**All design tokens live in `app/globals.css`** — never inline hex values in components, never use `bg-[var(--background)]` arbitrary syntax.
+**All design tokens live in `app/globals.css`** - never inline hex values in components, never use `bg-[var(--background)]` arbitrary syntax.
 
 - Tokens are declared as CSS vars on `:root` (light) and `.dark` (dark mode), then exposed to Tailwind via `@theme inline`. Current semantic tokens: `background`, `foreground`, `muted`, `muted-foreground`, `border`, `accent`, `accent-foreground`. Use them through Tailwind utilities: `bg-background`, `text-foreground`, `border-border`, `bg-muted`, `text-muted-foreground`, `bg-accent text-accent-foreground`.
 - Manual dark mode is wired via `@custom-variant dark (&:where(.dark, .dark *))`. The `dark` class on `<html>` is toggled by (a) an inline `<head>` script that runs pre-paint to avoid FOUC, and (b) `ThemeEffect` which reaffirms after hydration and subscribes to `prefers-color-scheme` when `theme === "system"`.
@@ -89,7 +89,7 @@ Conventions:
 
 - Cloudinary is the canonical image host. Configured via `images.remotePatterns` in `next.config.ts` for `https://res.cloudinary.com/**`.
 - `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` will hold the account name when set up; URL building helpers go in `lib/cloudinary/` when needed.
-- Always use `next/image` for product imagery — never raw `<img>`.
+- Always use `next/image` for product imagery - never raw `<img>`.
 
 ## Project layout
 
@@ -114,7 +114,7 @@ web/
 
 - One-line, imperative commit subjects. No co-author trailers requested by the repo owner.
 - Commit per logical step rather than batching unrelated changes.
-- Run `bunx tsc --noEmit` before committing; the dev server is usually already running in another terminal — do not start a new one.
+- Run `bunx tsc --noEmit` before committing; the dev server is usually already running in another terminal - do not start a new one.
 
 ## Open questions / TODO
 

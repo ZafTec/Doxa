@@ -12,14 +12,10 @@ async function bootstrap() {
     .map((s) => s.trim())
     .filter(Boolean);
   app.enableCors({
-    origin: [
-      'http://localhost:3001',
-      'http://127.0.0.1:3001',
-      ...extras,
-    ],
+    origin: ['http://localhost:3001', 'http://127.0.0.1:3001', ...extras],
     credentials: false,
   });
 
   await app.listen(process.env.PORT ?? 3000);
 }
-bootstrap();
+void bootstrap();
