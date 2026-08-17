@@ -299,6 +299,23 @@ async function main() {
   console.log(
     `✓ seed complete - ${categoryRows.length} categories, ${itemCount} items, ${variantCount} variants, ${assetCount} assets.`,
   );
+
+  // Bootstrap the first SUPER_ADMIN so there's at least one allowlisted
+  // Google account to sign in with. Upsert (not delete/recreate) so this
+  // step is safe to rerun without touching an admin's existing role.
+  const bootstrapEmail = process.env.BOOTSTRAP_ADMIN_EMAIL;
+  if (bootstrapEmail) {
+    await prisma.adminUser.upsert({
+      where: { email: bootstrapEmail },
+      update: { isProtected: true },
+      create: { email: bootstrapEmail, role: 'SUPER_ADMIN', isProtected: true },
+    });
+    console.log(`✓ bootstrap SUPER_ADMIN ensured for ${bootstrapEmail}`);
+  } else {
+    console.warn(
+      '⚠ BOOTSTRAP_ADMIN_EMAIL not set - no admin can log in until one is seeded.',
+    );
+  }
 }
 
 main()
