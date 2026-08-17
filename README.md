@@ -1,56 +1,67 @@
 # Doxa
 
-Doxa is a watch storefront composed of a NestJS API and a Next.js web application. Bun is the only supported package manager and runtime.
+Doxa is a watch storefront composed of a NestJS API and a Next.js web application. Each application manages its own dependencies and commands with Bun.
 
 ## Applications
 
-| Workspace | Purpose | Local URL |
-| --- | --- | --- |
+| Directory      | Purpose                                    | Local URL               |
+| -------------- | ------------------------------------------ | ----------------------- |
 | `nest-backend` | NestJS, Prisma, and PostgreSQL catalog API | `http://localhost:3000` |
-| `web` | Next.js storefront | `http://localhost:3001` |
+| `web`          | Next.js storefront                         | `http://localhost:3001` |
 
-## Local setup
+## Backend setup
 
 1. Copy `nest-backend/.env.example` to `nest-backend/.env`.
-2. Copy `web/.env.example` to `web/.env.local`.
-3. Ensure PostgreSQL is running and matches `DATABASE_URL`.
-4. Install all workspace dependencies from the repository root:
+2. Ensure PostgreSQL is running and matches `DATABASE_URL`.
+3. Install dependencies, prepare the database, and start the API:
 
 ```bash
+cd nest-backend
 bun install
-```
-
-5. Apply migrations and seed the development catalog:
-
-```bash
 bun run db:setup
+bun run dev
 ```
 
 The seed clears existing catalog data before inserting fixtures. Do not run it against a database containing data you need to keep.
 
-6. Start both applications:
+### Backend commands
 
 ```bash
+bun run dev                # Start the API in watch mode
+bun run build              # Build the API
+bun run lint               # Check backend and Prisma source
+bun run lint:fix           # Apply lint fixes
+bun run test               # Run unit tests
+bun run test:e2e           # Run e2e tests
+bun run db:generate        # Generate the Prisma client
+bun run db:migrate         # Create and apply a development migration
+bun run db:migrate:deploy  # Apply committed migrations
+bun run db:seed            # Reset and seed catalog fixtures
+bun run db:setup           # Apply migrations and seed fixtures
+bun run db:studio          # Open Prisma Studio
+```
+
+## Frontend setup
+
+In a separate terminal:
+
+```bash
+cd web
+bun install
 bun run dev
 ```
 
-## Root commands
+Copy `web/.env.example` to `web/.env.local` before starting the frontend. The development server uses port 3001 so the API can consistently use port 3000.
 
-| Command | Description |
-| --- | --- |
-| `bun run dev` | Start the API and storefront together |
-| `bun run dev:api` | Start only the NestJS API |
-| `bun run dev:web` | Start only the Next.js storefront |
-| `bun run build` | Build both workspaces |
-| `bun run lint` | Check both workspaces without modifying files |
-| `bun run lint:fix` | Apply lint fixes in both workspaces |
-| `bun run test` | Run backend unit tests |
-| `bun run test:e2e` | Run backend e2e tests |
-| `bun run check` | Run lint, tests, and builds |
-| `bun run db:setup` | Apply committed migrations and seed fixtures |
-| `bun run db:migrate` | Create and apply a development migration |
-| `bun run db:migrate:deploy` | Apply committed migrations |
-| `bun run db:seed` | Reset and seed catalog fixtures |
-| `bun run db:studio` | Open Prisma Studio |
+### Frontend commands
 
-Workspace-specific commands can still be run from their respective directories when needed.
+```bash
+bun run dev       # Start the storefront in development mode
+bun run build     # Build the storefront
+bun run lint      # Check frontend source
+bun run lint:fix  # Apply lint fixes
+```
+
+## Editor configuration
+
+Repository-specific Zed settings live in `.zed/settings.json` and configure the TypeScript language server to use the workspace TypeScript SDK.
