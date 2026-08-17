@@ -128,3 +128,34 @@ export type CreateAssetPayload = {
 export type CreateCategoryPayload = {
   name: string;
 };
+
+export type AdminRole = "SUPER_ADMIN" | "EDITOR";
+
+export type AdminUser = {
+  id: string;
+  email: string;
+  name: string | null;
+  role: AdminRole;
+  lastLoginAt: ISODateString | null;
+  /** Seeded bootstrap admin - can never be role-changed or removed. */
+  isProtected: boolean;
+  createdAt: ISODateString;
+  updatedAt: ISODateString;
+};
+
+export type CurrentAdmin = {
+  id: string;
+  email: string;
+  name: string | null;
+  role: AdminRole;
+};
+
+export type CreateAdminUserPayload = {
+  email: string;
+  name?: string;
+  role: AdminRole;
+};
+
+export type UpdateAdminUserRolePayload = {
+  role: AdminRole;
+};

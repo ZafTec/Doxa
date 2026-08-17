@@ -36,11 +36,33 @@ Ecommerce storefront. Watches first, additional categories later. Backend (separ
 - Next.js 16 changed `fetch` defaults: **fetch is NOT cached by default.** You must opt in with `cache: 'force-cache'` or `next: { revalidate }`. Our `serverFetch` always forwards `next: { revalidate, tags }` so callers stay explicit.
 - For authenticated SSR (e.g. account pages), read the request cookie via `cookies()` and pass it through `serverFetch(path, { cookie })`.
 
-## Auth - none in v1
+## Auth
 
-Guest-only storefront. No login, no session cookie, no `useSessionStore`. Cart lives entirely in `localStorage`. Re-add when the backend grows an auth module and we wire a customer dashboard.
+The storefront itself is still guest-only in v1: no customer login, no `useSessionStore`. Cart lives entirely in `localStorage`.
 
-`axios` is still configured with `withCredentials: true` so that flipping the switch later doesn't require touching the client.
+**Admin auth exists** (`app/admin/`), separate from the storefront: Google OAuth only, no
+passwords. Admins are an allowlist - a Google sign-in only succeeds if the email already
+exists as an `AdminUser` row on the backend (added via `/admin/users/new`, SUPER_ADMIN
+only). Session is a single httpOnly JWT cookie (`access_token`, ~7 days) set by
+`nest-backend`'s `/auth/google/callback`; there's no refresh-token flow - the backend
+re-reads the `AdminUser` row on every request instead, so revoking access or changing a
+role takes effect on the admin's next request.
+
+- `app/admin/login` - plain link to `${NEXT_PUBLIC_API_URL}/auth/google` (full navigation,
+  not axios - OAuth needs a real browser redirect chain).
+- `app/admin/(protected)/layout.tsx` - the auth gate. Forwards the request's `Cookie`
+  header to `GET /auth/me`; redirects to `/admin/login` on failure. Must stay a sibling of
+  (not a parent of) `app/admin/login` or the redirect loops.
+- `middleware.ts` - cheap defense-in-depth only (redirects when the `access_token` cookie
+  is absent); it does not verify the JWT. Real auth is the layout above.
+- Reads: `lib/api/endpoints/auth.ts` / `admin-users.ts` (`server-only`, forward the cookie
+  explicitly - these are NOT in the shared `lib/api` barrel to avoid poisoning client
+  bundles). Mutations: `*-client.ts` siblings (`auth-client.ts`, `items-client.ts`,
+  `categories-client.ts`, `admin-users-client.ts`) using `lib/api/client.ts`'s axios
+  instance - the browser attaches the httpOnly cookie automatically, no manual forwarding
+  needed.
+
+`axios` (`lib/api/client.ts`) is configured with `withCredentials: true` for this reason.
 
 ## Catalog data model (web view)
 
@@ -95,19 +117,29 @@ Conventions:
 
 ```
 web/
-  app/                        Routes (App Router)
+  middleware.ts                Admin route cookie-presence check (see Auth section)
+  app/
+    (storefront)/               Guest-only storefront, wrapped in SiteHeader/Sidebar/Cart/Footer
+      page.tsx, watches/[id]/
+    admin/                       Admin panel - no storefront chrome
+      login/                      Public: Google sign-in link
+      (protected)/                 Auth-gated via layout.tsx -> GET /auth/me
+        page.tsx, items/, categories/, users/
+      components/                  AdminShell, AdminNav, LogoutButton, form-field helpers
   lib/
     api/
-      client.ts               axios instance (cookie-ready; auth off in v1)
+      client.ts               axios instance (cookie-ready, withCredentials: true)
       server.ts               server-side fetch wrapper (RSC)
       errors.ts               ApiError class
       types.ts                ApiResponse / ApiErrorPayload
       endpoints/
-        types.ts              Item / ItemVariant / Category / Paginated<T>
-        items.ts              GET /item, GET /item/:id, POST /item/create
-        categories.ts         GET /category, POST /category/create
+        types.ts              Item / ItemVariant / Category / AdminUser / Paginated<T>
+        items.ts, categories.ts        Public reads + provisional serverApi creates (server-only)
+        items-client.ts, categories-client.ts   Client-side creates used by admin forms
+        auth.ts, admin-users.ts        Admin reads, server-only, cookie forwarded explicitly
+        auth-client.ts, admin-users-client.ts    Admin mutations via client.ts axios
     store/                    Zustand stores (cart, ui)
-    validation/               useZodForm + shared zod schemas
+    validation/               useZodForm + shared zod schemas + admin-schemas.ts
 ```
 
 ## Commit & workflow conventions
