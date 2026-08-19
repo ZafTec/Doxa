@@ -2,14 +2,7 @@
 
 import { useEffect } from "react";
 import { useUiStore } from "@/lib/store";
-
-function resolveTheme(theme: "light" | "dark" | "system"): "light" | "dark" {
-  if (theme !== "system") return theme;
-  if (typeof window === "undefined") return "light";
-  return window.matchMedia("(prefers-color-scheme: dark)").matches
-    ? "dark"
-    : "light";
-}
+import { resolveTheme } from "@/lib/util/theme";
 
 export function ThemeEffect() {
   const theme = useUiStore((s) => s.theme);
