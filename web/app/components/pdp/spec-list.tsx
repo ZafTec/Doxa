@@ -1,4 +1,4 @@
-import type { ItemVariantSummary } from "@/lib/api";
+import type { ItemDetailsVariant } from "@/lib/api";
 
 export function SpecList({
   brand,
@@ -6,7 +6,7 @@ export function SpecList({
   selectedVariantId,
 }: {
   brand: string;
-  variants: ItemVariantSummary[];
+  variants: ItemDetailsVariant[];
   selectedVariantId?: string;
 }) {
   const selected = variants.find((v) => v.id === selectedVariantId) ?? variants[0];

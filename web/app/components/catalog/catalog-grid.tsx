@@ -1,7 +1,7 @@
-import type { Item } from "@/lib/api";
+import type { ItemListItem } from "@/lib/api";
 import { ProductCard } from "./product-card";
 
-export function CatalogGrid({ items }: { items: Item[] }) {
+export function CatalogGrid({ items }: { items: ItemListItem[] }) {
   if (items.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center gap-3 py-24 text-center">

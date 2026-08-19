@@ -5,6 +5,7 @@ import type {
   CreateItemVariantPayload,
   Item,
   ItemDetails,
+  ItemListItem,
   ItemListQuery,
   Paginated,
 } from "./types";
@@ -26,15 +27,12 @@ function toQueryString(q: ItemListQuery = {}): string {
 
 export const itemsApi = {
   list: (query: ItemListQuery = {}, opts?: { revalidate?: number | false }) =>
-    serverApi.get<Paginated<Item>>(`/item${toQueryString(query)}`, {
+    serverApi.get<Paginated<ItemListItem>>(`/item${toQueryString(query)}`, {
       revalidate: opts?.revalidate ?? 60,
       tags: [itemTags.all],
     }),
 
-  /**
-   * PDP read. Returns the flattened `ItemDetails` shape that the backend
-   * builds from the item's first variant + full variant list + assets.
-   */
+  /** PDP read with variant-specific content and assets. */
   details: (id: string, opts?: { revalidate?: number | false }) =>
     serverApi.get<ItemDetails>(`/item/${id}`, {
       revalidate: opts?.revalidate ?? 60,
