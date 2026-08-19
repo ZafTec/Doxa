@@ -4,6 +4,8 @@ import { adminUsersApi } from "@/lib/api/endpoints/admin-users";
 import { authApi } from "@/lib/api/endpoints/auth";
 import { ApiError } from "@/lib/api";
 import { AdminUserRowActions } from "./admin-user-row-actions";
+import { buttonVariants } from "@/app/components/ui/button";
+import { Eyebrow } from "@/app/components/ui/eyebrow";
 
 export default async function AdminUsersPage() {
   const cookieStore = await cookies();
@@ -32,23 +34,20 @@ export default async function AdminUsersPage() {
     <div>
       <div className="mb-8 flex items-center justify-between">
         <h1 className="text-2xl font-semibold tracking-tight">Admin users</h1>
-        <Link
-          href="/admin/users/new"
-          className="bg-accent px-4 py-2 text-xs font-medium uppercase tracking-[0.08em] text-accent-foreground transition-opacity hover:opacity-90"
-        >
+        <Link href="/admin/users/new" className={buttonVariants({ size: "xs" })}>
           Add admin
         </Link>
       </div>
 
       <table className="w-full border-collapse text-sm">
         <thead>
-          <tr className="border-b border-border text-left text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+          <Eyebrow as="tr" className="border-b border-border text-left">
             <th className="py-3 pr-4">Email</th>
             <th className="py-3 pr-4">Name</th>
             <th className="py-3 pr-4">Role</th>
             <th className="py-3 pr-4">Last login</th>
             <th className="py-3 pr-4" />
-          </tr>
+          </Eyebrow>
         </thead>
         <tbody>
           {admins.map((admin) => (

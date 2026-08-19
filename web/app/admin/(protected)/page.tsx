@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { authApi } from "@/lib/api/endpoints/auth";
+import { cardClassName } from "@/app/components/ui/card";
 
 export default async function AdminDashboardPage() {
   const cookieStore = await cookies();
@@ -34,7 +35,7 @@ export default async function AdminDashboardPage() {
           <Link
             key={card.href}
             href={card.href}
-            className="border border-border p-6 transition-colors hover:bg-muted"
+            className={cardClassName + " transition-colors hover:bg-muted"}
           >
             <h2 className="mb-1 text-sm font-medium uppercase tracking-[0.08em]">
               {card.label}

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { categoriesApi } from "@/lib/api";
+import { buttonVariants } from "@/app/components/ui/button";
 
 export default async function AdminCategoriesPage() {
   const categories = await categoriesApi.list({ revalidate: 0 });
@@ -8,10 +9,7 @@ export default async function AdminCategoriesPage() {
     <div>
       <div className="mb-8 flex items-center justify-between">
         <h1 className="text-2xl font-semibold tracking-tight">Categories</h1>
-        <Link
-          href="/admin/categories/new"
-          className="bg-accent px-4 py-2 text-xs font-medium uppercase tracking-[0.08em] text-accent-foreground transition-opacity hover:opacity-90"
-        >
+        <Link href="/admin/categories/new" className={buttonVariants({ size: "xs" })}>
           New category
         </Link>
       </div>

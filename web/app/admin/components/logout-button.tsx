@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
 import { authClientApi } from "@/lib/api/endpoints/auth-client";
+import { eyebrowBaseClassName } from "@/app/components/ui/eyebrow";
 
 export function LogoutButton() {
   const router = useRouter();
@@ -24,7 +25,11 @@ export function LogoutButton() {
       type="button"
       onClick={handleLogout}
       disabled={pending}
-      className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground disabled:opacity-40"
+      className={
+        "flex items-center gap-2 " +
+        eyebrowBaseClassName +
+        " text-muted-foreground transition-colors hover:text-foreground disabled:opacity-40"
+      }
     >
       <LogOut className="size-3.5" />
       Log out
