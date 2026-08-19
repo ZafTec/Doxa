@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ViewTransition } from "react";
 import type { ItemListItem } from "@/lib/api";
 import { itemTitle, minPrice } from "@/lib/util/item";
 import { formatPrice } from "@/lib/util/money";
@@ -18,12 +19,14 @@ export function Related({ items }: { items: ItemListItem[] }) {
           return (
             <Link key={item.id} href={`/watches/${item.id}`} className="group block">
               <div className="mb-4 overflow-hidden">
-                <ProductImage
-                  brand={item.brand}
-                  src={heroAsset}
-                  placeholderKey={item.id}
-                  className="transition-transform duration-500 group-hover:scale-[1.02]"
-                />
+                <ViewTransition name={`item-image-${item.id}`} share="morph">
+                  <ProductImage
+                    brand={item.brand}
+                    src={heroAsset}
+                    placeholderKey={item.id}
+                    className="transition-transform duration-500 group-hover:scale-[1.02]"
+                  />
+                </ViewTransition>
               </div>
               <Eyebrow>{item.brand}</Eyebrow>
               <div className="mt-1 flex items-baseline justify-between gap-2">
