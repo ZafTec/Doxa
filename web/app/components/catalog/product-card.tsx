@@ -3,6 +3,7 @@ import type { Item } from "@/lib/api";
 import { itemTitle, minPrice } from "@/lib/util/item";
 import { formatPrice } from "@/lib/util/money";
 import { ProductImage } from "../product-image";
+import { Eyebrow } from "../ui/eyebrow";
 
 export function ProductCard({ item }: { item: Item }) {
   const title = itemTitle(item);
@@ -21,9 +22,7 @@ export function ProductCard({ item }: { item: Item }) {
       />
 
       <div className="mt-3 flex items-start justify-between">
-        <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
-          {item.brand}
-        </span>
+        <Eyebrow>{item.brand}</Eyebrow>
         {variants.length > 0 && (
           <div className="flex gap-1.5 pt-1">
             {variants.slice(0, 3).map((v) => (

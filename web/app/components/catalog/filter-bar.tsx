@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { X } from "lucide-react";
+import { badgeVariants } from "@/app/components/ui/badge";
 
 export type ActiveFilter = {
   key: string;
@@ -25,7 +26,7 @@ export function FilterBar({
             <Link
               key={f.key}
               href={f.removeHref}
-              className="flex shrink-0 items-center gap-2 bg-muted px-3 py-1 transition-colors hover:bg-muted/70"
+              className={badgeVariants({ className: "normal-case" })}
             >
               <span>{f.label}</span>
               <X className="size-3" />
