@@ -55,3 +55,31 @@ body {
     outline-offset: 2px;
   }
 }
+
+/*
+ * Product image morph (catalog/related card -> PDP gallery), wired via
+ * React's <ViewTransition name="item-image-..." share="morph"> in
+ * ProductCard, Related and Gallery. A brief blur mid-flight hides
+ * pixel-interpolation artifacts as the two differently-sized crops
+ * resize into each other - keep this short, it's a hand-off, not a show.
+ */
+::view-transition-group(.morph) {
+  animation-duration: 320ms;
+}
+::view-transition-image-pair(.morph) {
+  animation-name: doxa-morph-blur;
+}
+@keyframes doxa-morph-blur {
+  30% {
+    filter: blur(2px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
+}

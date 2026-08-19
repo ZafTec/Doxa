@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ViewTransition } from "react";
 import type { ItemListItem } from "@/lib/api";
 import { itemTitle, minPrice } from "@/lib/util/item";
 import { formatPrice } from "@/lib/util/money";
@@ -13,13 +14,15 @@ export function ProductCard({ item }: { item: ItemListItem }) {
 
   return (
     <Link href={`/watches/${item.id}`} className="group block">
-      <ProductImage
-        brand={item.brand}
-        src={heroAsset}
-        placeholderKey={item.id}
-        alt={`${item.brand} ${title}`}
-        className="transition-transform duration-500 group-hover:scale-[1.02]"
-      />
+      <ViewTransition name={`item-image-${item.id}`} share="morph">
+        <ProductImage
+          brand={item.brand}
+          src={heroAsset}
+          placeholderKey={item.id}
+          alt={`${item.brand} ${title}`}
+          className="transition-transform duration-500 group-hover:scale-[1.02]"
+        />
+      </ViewTransition>
 
       <div className="mt-3 flex items-start justify-between">
         <Eyebrow>{item.brand}</Eyebrow>

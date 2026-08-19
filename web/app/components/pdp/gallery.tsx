@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, ViewTransition } from "react";
 import Image from "next/image";
 import { fallbackPlaceholder } from "@/lib/placeholders/watches";
 
@@ -45,16 +45,18 @@ export function Gallery({
       </div>
 
       <div className="relative order-1 flex flex-1 items-center justify-center overflow-hidden bg-muted md:order-2 md:min-h-[560px]">
-        <Image
-          src={mainUrl}
-          alt={`${brand} watch`}
-          width={560}
-          height={560}
-          sizes="(max-width: 768px) 100vw, 560px"
-          className="h-auto w-full max-w-[560px] object-contain"
-          unoptimized
-          priority
-        />
+        <ViewTransition name={`item-image-${placeholderKey}`} share="morph">
+          <Image
+            src={mainUrl}
+            alt={`${brand} watch`}
+            width={560}
+            height={560}
+            sizes="(max-width: 768px) 100vw, 560px"
+            className="h-auto w-full max-w-[560px] object-contain"
+            unoptimized
+            priority
+          />
+        </ViewTransition>
       </div>
     </section>
   );
