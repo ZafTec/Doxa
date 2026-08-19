@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { AnimatePresence, motion } from "motion/react";
 import { Minus, Plus, X } from "lucide-react";
 import { useCartStore, useUiStore, type CartLine } from "@/lib/store";
 import { formatPrice } from "@/lib/util/money";
@@ -8,6 +9,9 @@ import { ProductImage } from "./product-image";
 import { IconButton } from "./ui/icon-button";
 import { Eyebrow } from "./ui/eyebrow";
 import { Button } from "./ui/button";
+
+// Subtle, Apple-style spring: settles like a physical panel, not a bounce toy.
+const drawerSpring = { type: "spring", duration: 0.35, bounce: 0.15 } as const;
 
 export function CartDrawer() {
   const open = useUiStore((s) => s.cartOpen);
@@ -18,21 +22,22 @@ export function CartDrawer() {
 
   return (
     <>
-      <div
+      <motion.div
         onClick={() => setOpen(false)}
         aria-hidden
-        className={
-          "fixed inset-0 z-40 bg-black/40 transition-opacity " +
-          (open ? "opacity-100" : "pointer-events-none opacity-0")
-        }
+        initial={false}
+        animate={{ opacity: open ? 1 : 0 }}
+        transition={{ duration: 0.15 }}
+        style={{ pointerEvents: open ? "auto" : "none" }}
+        className="fixed inset-0 z-40 bg-black/40"
       />
-      <aside
+      <motion.aside
         role="dialog"
         aria-label="Shopping bag"
-        className={
-          "fixed inset-y-0 right-0 z-50 flex w-full max-w-[420px] transform flex-col border-l border-border bg-background transition-transform duration-240 ease-out " +
-          (open ? "translate-x-0" : "translate-x-full")
-        }
+        initial={false}
+        animate={{ transform: open ? "translateX(0%)" : "translateX(100%)" }}
+        transition={drawerSpring}
+        className="fixed inset-y-0 right-0 z-50 flex w-full max-w-[420px] flex-col border-l border-border bg-background"
       >
         <header className="flex items-center justify-between border-b border-border px-6 py-5">
           <div>
@@ -51,9 +56,11 @@ export function CartDrawer() {
             <EmptyCart />
           ) : (
             <ul className="divide-y divide-border">
-              {lines.map((line) => (
-                <CartRow key={line.variantId} line={line} />
-              ))}
+              <AnimatePresence initial={false}>
+                {lines.map((line) => (
+                  <CartRow key={line.variantId} line={line} />
+                ))}
+              </AnimatePresence>
             </ul>
           )}
         </div>
@@ -72,7 +79,7 @@ export function CartDrawer() {
             <Button className="w-full">Checkout</Button>
           </footer>
         )}
-      </aside>
+      </motion.aside>
     </>
   );
 }
@@ -99,7 +106,14 @@ function CartRow({ line }: { line: CartLine }) {
   const lineTotal = line.unitPrice * line.quantity;
 
   return (
-    <li className="flex gap-4 py-4">
+    <motion.li
+      layout
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+      className="flex gap-4 py-4"
+    >
       <Link
         href={`/watches/${line.itemId}`}
         aria-label={`Open ${line.brand} ${line.description}`}
@@ -161,6 +175,6 @@ function CartRow({ line }: { line: CartLine }) {
       >
         <X className="size-4" />
       </IconButton>
-    </li>
+    </motion.li>
   );
 }

@@ -1,10 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { motion } from "motion/react";
 import { X } from "lucide-react";
 import { useUiStore } from "@/lib/store";
 import { IconButton } from "./ui/icon-button";
 import { Eyebrow } from "./ui/eyebrow";
+
+// Matches the cart drawer's spring - the two slide-out panels should feel identical.
+const drawerSpring = { type: "spring", duration: 0.35, bounce: 0.15 } as const;
 
 const sections = [
   {
@@ -33,19 +37,20 @@ export function SiteSidebar() {
 
   return (
     <>
-      <div
+      <motion.div
         onClick={() => setOpen(false)}
         aria-hidden
-        className={
-          "fixed inset-0 z-40 bg-black/40 transition-opacity " +
-          (open ? "opacity-100" : "pointer-events-none opacity-0")
-        }
+        initial={false}
+        animate={{ opacity: open ? 1 : 0 }}
+        transition={{ duration: 0.15 }}
+        style={{ pointerEvents: open ? "auto" : "none" }}
+        className="fixed inset-0 z-40 bg-black/40"
       />
-      <aside
-        className={
-          "fixed inset-y-0 left-0 z-50 w-72 transform border-r border-border bg-background p-6 transition-transform duration-240 ease-out " +
-          (open ? "translate-x-0" : "-translate-x-full")
-        }
+      <motion.aside
+        initial={false}
+        animate={{ transform: open ? "translateX(0%)" : "translateX(-100%)" }}
+        transition={drawerSpring}
+        className="fixed inset-y-0 left-0 z-50 w-72 border-r border-border bg-background p-6"
       >
         <div className="mb-8 flex items-center justify-between">
           <span className="text-xl font-bold tracking-[0.2em]">DOXA</span>
@@ -76,7 +81,7 @@ export function SiteSidebar() {
             </div>
           ))}
         </nav>
-      </aside>
+      </motion.aside>
     </>
   );
 }
