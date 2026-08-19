@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { eyebrowBaseClassName } from "../ui/eyebrow";
 
 export type Crumb = { label: string; href?: string };
 
@@ -15,15 +16,17 @@ export function Breadcrumbs({ crumbs }: { crumbs: Crumb[] }) {
             {c.href && !isLast ? (
               <Link
                 href={c.href}
-                className="text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground"
+                className={
+                  eyebrowBaseClassName +
+                  " text-muted-foreground transition-colors hover:text-foreground"
+                }
               >
                 {c.label}
               </Link>
             ) : (
               <span
                 className={
-                  "text-xs font-medium uppercase tracking-[0.08em] " +
-                  (isLast ? "text-foreground" : "text-muted-foreground")
+                  eyebrowBaseClassName + " " + (isLast ? "text-foreground" : "text-muted-foreground")
                 }
               >
                 {c.label}

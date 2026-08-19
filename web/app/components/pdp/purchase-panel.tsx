@@ -5,6 +5,8 @@ import { Minus, Plus } from "lucide-react";
 import type { ItemVariantSummary } from "@/lib/api";
 import { useCartStore, useUiStore } from "@/lib/store";
 import { formatPriceWithCurrencyLabel } from "@/lib/util/money";
+import { Eyebrow } from "../ui/eyebrow";
+import { Button } from "../ui/button";
 
 export type PurchasePanelProps = {
   itemId: string;
@@ -66,9 +68,9 @@ export function PurchasePanel({
   return (
     <section className="flex flex-col space-y-8">
       <div>
-        <span className="mb-2 block text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground">
+        <Eyebrow as="span" className="mb-2 block">
           {brand}
-        </span>
+        </Eyebrow>
         <h1 className="mb-2 text-[32px] font-semibold leading-tight tracking-tight md:text-[40px]">
           {name}
         </h1>
@@ -88,11 +90,11 @@ export function PurchasePanel({
       )}
 
       {selected && (
-        <p className="text-xs uppercase tracking-[0.08em] text-muted-foreground">
+        <Eyebrow as="p">
           {selected.stockQuantity > 0
             ? `${selected.stockQuantity} in stock`
             : "Out of stock"}
-        </p>
+        </Eyebrow>
       )}
 
       <div className="flex flex-col space-y-4">
@@ -118,14 +120,9 @@ export function PurchasePanel({
           </button>
         </div>
 
-        <button
-          type="button"
-          onClick={handleAdd}
-          disabled={!canBuy}
-          className="h-14 w-full bg-accent text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
-        >
+        <Button size="lg" onClick={handleAdd} disabled={!canBuy} className="w-full">
           {canBuy ? "Add to bag" : "Out of stock"}
-        </button>
+        </Button>
 
         <p className="pt-2 text-center text-xs text-muted-foreground">
           Free shipping over $500 · Returns within 30 days.
@@ -148,9 +145,7 @@ function VariantPicker({
 
   return (
     <div className="space-y-4">
-      <label className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
-        Color - {selected?.color ?? "Select"}
-      </label>
+      <Eyebrow as="label">Color - {selected?.color ?? "Select"}</Eyebrow>
       <div className="flex flex-wrap gap-3">
         {variants.map((v) => {
           const isSelected = v.id === selectedId;
