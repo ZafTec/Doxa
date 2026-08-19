@@ -3,6 +3,7 @@ import type { Item } from "@/lib/api";
 import { itemTitle, minPrice } from "@/lib/util/item";
 import { formatPrice } from "@/lib/util/money";
 import { ProductImage } from "../product-image";
+import { Eyebrow } from "../ui/eyebrow";
 
 export function Related({ items }: { items: Item[] }) {
   if (items.length === 0) return null;
@@ -24,9 +25,7 @@ export function Related({ items }: { items: Item[] }) {
                   className="transition-transform duration-500 group-hover:scale-[1.02]"
                 />
               </div>
-              <span className="text-[10px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
-                {item.brand}
-              </span>
+              <Eyebrow>{item.brand}</Eyebrow>
               <div className="mt-1 flex items-baseline justify-between gap-2">
                 <h3 className="line-clamp-1 text-sm font-medium">{itemTitle(item)}</h3>
                 {price !== undefined && (
