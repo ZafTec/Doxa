@@ -1,11 +1,11 @@
 import Link from "next/link";
-import type { Item } from "@/lib/api";
+import type { ItemListItem } from "@/lib/api";
 import { itemTitle, minPrice } from "@/lib/util/item";
 import { formatPrice } from "@/lib/util/money";
 import { ProductImage } from "../product-image";
 import { Eyebrow } from "../ui/eyebrow";
 
-export function Related({ items }: { items: Item[] }) {
+export function Related({ items }: { items: ItemListItem[] }) {
   if (items.length === 0) return null;
 
   return (
@@ -14,7 +14,7 @@ export function Related({ items }: { items: Item[] }) {
       <div className="grid grid-cols-2 gap-8 lg:grid-cols-4">
         {items.slice(0, 4).map((item) => {
           const price = minPrice(item);
-          const heroAsset = item.itemVariants?.[0]?.assets?.[0]?.url;
+          const heroAsset = item.itemVariants[0]?.assets[0]?.url;
           return (
             <Link key={item.id} href={`/watches/${item.id}`} className="group block">
               <div className="mb-4 overflow-hidden">

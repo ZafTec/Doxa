@@ -7,8 +7,8 @@
  *   carry the user-pickable axes: color, price, stock, plus their own
  *   marketing name + description, plus assets (image URLs).
  *
- *   PDP reads use `ItemDetails` (a flat shape the backend assembles from the
- *   first variant); the list endpoint still returns plain Item rows.
+ *   List and PDP reads use explicit endpoint contracts. Variant-specific
+ *   fields and assets stay on their owning variant.
  */
 
 export type ISODateString = string;
@@ -29,22 +29,19 @@ export type ItemVariant = {
   price: number;
   name: string;
   description: string;
-  /**
-   * Included by the list endpoint as a slim shape (just `url`); the full
-   * `Asset` row isn't always in this payload.
-   */
-  assets?: Array<{ url: string }>;
+  /** Asset shape included by the item list endpoint. */
+  assets: Array<{ url: string }>;
 };
 
-/**
- * Trimmed variant shape returned by `GET /item/:id/variant` and embedded
- * inside `ItemDetails.variants`. Only what's needed for the variant picker.
- */
-export type ItemVariantSummary = {
+export type ItemDetailsVariant = {
   id: string;
   color: string;
-  price: number;
   stockQuantity: number;
+  /** Minor units (e.g. cents). Never floats. */
+  price: number;
+  name: string;
+  description: string;
+  assets: string[];
 };
 
 export type Asset = {
@@ -58,29 +55,23 @@ export type Item = {
   brand: string;
   description: string;
   categoryId: string;
-  category?: Category;
-  itemVariants?: ItemVariant[];
   createdAt: ISODateString;
   updatedAt: ISODateString;
 };
 
-/**
- * Response shape returned by `GET /item/:id` - assembled by the backend
- * from the item's first variant. Fields are flattened for direct UI use:
- *   `name` / `description` / `price` come from the first variant.
- *   `assets` is the image URL list for the first variant.
- *   `variants` is the slim picker list (all variants, with stock).
- *   `brand` / `category` come from the parent Item.
- */
+/** Response shape returned by `GET /item`. */
+export type ItemListItem = Item & {
+  category: Category;
+  itemVariants: ItemVariant[];
+};
+
+/** Response shape returned by `GET /item/:id`. */
 export type ItemDetails = {
   id: string;
   brand: string;
-  category: Category | null;
-  name: string;
   description: string;
-  price: number;
-  assets: string[];
-  variants: { itemVariants: ItemVariantSummary[] } | null;
+  category: Category;
+  variants: ItemDetailsVariant[];
 };
 
 /**

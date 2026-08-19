@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Minus, Plus } from "lucide-react";
-import type { ItemVariantSummary } from "@/lib/api";
+import type { ItemDetailsVariant } from "@/lib/api";
 import { useCartStore, useUiStore } from "@/lib/store";
 import { formatPriceWithCurrencyLabel } from "@/lib/util/money";
 import { Eyebrow } from "../ui/eyebrow";
@@ -11,42 +11,34 @@ import { Button } from "../ui/button";
 export type PurchasePanelProps = {
   itemId: string;
   brand: string;
-  name: string;
   description: string;
-  price: number;
-  variants: ItemVariantSummary[];
-  /**
-   * Image URL snapshotted into the cart line. Today the backend's
-   * `ItemDetails.assets` only carries the first variant's images, so we
-   * use the same URL for any selected variant. TODO(media): fetch
-   * per-variant assets when the picker changes.
-   */
-  imageSrc?: string;
+  variants: ItemDetailsVariant[];
+  selectedVariantId: string | undefined;
+  onVariantSelect: (id: string) => void;
 };
 
 export function PurchasePanel({
   itemId,
   brand,
-  name,
   description,
-  price,
   variants,
-  imageSrc,
+  selectedVariantId,
+  onVariantSelect,
 }: PurchasePanelProps) {
-  const sorted = useMemo(
-    () => [...variants].sort((a, b) => a.price - b.price),
-    [variants],
-  );
-  const initial = sorted.find((v) => v.stockQuantity > 0) ?? sorted[0];
-  const [selectedId, setSelectedId] = useState<string | undefined>(initial?.id);
   const [quantity, setQuantity] = useState(1);
   const add = useCartStore((s) => s.add);
   const openCart = useUiStore((s) => s.setCartOpen);
 
-  const selected = sorted.find((v) => v.id === selectedId) ?? initial;
+  const selected = variants.find((variant) => variant.id === selectedVariantId);
   const canBuy = selected !== undefined && selected.stockQuantity > 0;
-  const displayPrice = selected?.price ?? price;
-  const maxQty = Math.min(99, selected?.stockQuantity ?? 99);
+  const maxQty = Math.min(99, selected?.stockQuantity ?? 1);
+  const displayName = selected?.name ?? brand;
+  const displayDescription = selected?.description || description;
+
+  function handleVariantSelect(id: string) {
+    setQuantity(1);
+    onVariantSelect(id);
+  }
 
   function handleAdd() {
     if (!selected || !canBuy) return;
@@ -55,10 +47,10 @@ export function PurchasePanel({
         variantId: selected.id,
         itemId,
         brand,
-        description: name,
+        description: selected.name,
         color: selected.color,
         unitPrice: selected.price,
-        image: imageSrc,
+        image: selected.assets[0],
       },
       Math.min(quantity, maxQty),
     );
@@ -72,20 +64,20 @@ export function PurchasePanel({
           {brand}
         </Eyebrow>
         <h1 className="mb-2 text-[32px] font-semibold leading-tight tracking-tight md:text-[40px]">
-          {name}
+          {displayName}
         </h1>
-        <p className="text-base text-muted-foreground">{description}</p>
+        <p className="text-base text-muted-foreground">{displayDescription}</p>
       </div>
 
       <div className="text-2xl font-medium tabular-nums">
-        {formatPriceWithCurrencyLabel(displayPrice)}
+        {selected ? formatPriceWithCurrencyLabel(selected.price) : "Unavailable"}
       </div>
 
-      {sorted.length > 0 && (
+      {variants.length > 0 && (
         <VariantPicker
-          variants={sorted}
+          variants={variants}
           selectedId={selected?.id}
-          onSelect={setSelectedId}
+          onSelect={handleVariantSelect}
         />
       )}
 
@@ -137,7 +129,7 @@ function VariantPicker({
   selectedId,
   onSelect,
 }: {
-  variants: ItemVariantSummary[];
+  variants: ItemDetailsVariant[];
   selectedId: string | undefined;
   onSelect: (id: string) => void;
 }) {

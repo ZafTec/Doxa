@@ -11,16 +11,14 @@ import type {
 } from './item.schema';
 import type { Category, Item, Prisma } from '../../prisma/generated/client';
 import { getPage, queryParameters } from '../shared/pagination';
-import { ItemWhereInput } from '../../prisma/generated/models/Item';
+import type { ItemWhereInput } from '../../prisma/generated/models/Item';
 import { PaginatedData } from '../shared/shared.types';
-import { AssetService } from '../asset/asset.service';
+import type { ItemDetailsDto, ItemListDto } from './item.dto';
+import { itemRelations, toItemDetailsDto, toItemListDto } from './item.mapper';
 
 @Injectable()
 export class ItemService {
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly assetService: AssetService,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   private buildItemFilters(filters: ItemQueryDto): Prisma.ItemWhereInput {
     const where: Prisma.ItemWhereInput = {};
@@ -39,7 +37,7 @@ export class ItemService {
     return where;
   }
 
-  async getAll(queryParams: ItemQueryDto): Promise<PaginatedData<Item>> {
+  async getAll(queryParams: ItemQueryDto): Promise<PaginatedData<ItemListDto>> {
     const page = getPage(queryParams.pageNumber, queryParams.pageSize);
     const filters = this.buildItemFilters(queryParams);
     const databaseQueryParameters = queryParameters<ItemWhereInput>(
@@ -52,17 +50,11 @@ export class ItemService {
     });
     const data = await this.prisma.item.findMany({
       ...databaseQueryParameters,
-      include: {
-        category: true,
-        itemVariants: {
-          orderBy: { price: 'asc' },
-          include: { assets: { select: { url: true } } },
-        },
-      },
+      include: itemRelations,
     });
 
     return {
-      data: data as unknown as Item[],
+      data: data.map(toItemListDto),
       metadata: {
         pageNumber: page.pageNum,
         pageSize: page.pageSize,
@@ -85,15 +77,10 @@ export class ItemService {
     return createdItem;
   }
 
-  async getItem(id: string) {
+  private async getItem(id: string) {
     const item = await this.prisma.item.findUnique({
       where: { id },
-      include: {
-        category: true,
-        itemVariants: {
-          orderBy: { price: 'asc' },
-        },
-      },
+      include: itemRelations,
     });
     if (!item) {
       throw new NotFoundException('Item not found');
@@ -101,40 +88,9 @@ export class ItemService {
     return item;
   }
 
-  async getItemDetails(id: string) {
+  async getItemDetails(id: string): Promise<ItemDetailsDto> {
     const item = await this.getItem(id);
-
-    const firstItemName =
-      item.itemVariants.length > 0 ? item.itemVariants[0].name : 'No name';
-    const firstItemVariantPrice =
-      item.itemVariants.length > 0 ? item.itemVariants[0].price : 0;
-    const firstItemVariantDescription =
-      item.itemVariants.length > 0
-        ? item.itemVariants[0].description
-        : item.description;
-    const urls =
-      item.itemVariants.length > 0
-        ? await this.assetService.fetchAssetByItemVariantId(
-            item.itemVariants[0].id,
-          )
-        : [];
-    return {
-      id: item.id,
-      brand: item.brand,
-      category: item.category,
-      variants: {
-        itemVariants: item.itemVariants.map((v) => ({
-          id: v.id,
-          color: v.color,
-          price: v.price,
-          stockQuantity: v.stockQuantity,
-        })),
-      },
-      price: firstItemVariantPrice,
-      description: firstItemVariantDescription,
-      assets: urls,
-      name: firstItemName,
-    };
+    return toItemDetailsDto(item);
   }
 
   async createItemVariant(itemVariant: CreateItemVariantDto) {

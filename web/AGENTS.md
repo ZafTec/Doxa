@@ -66,13 +66,11 @@ role takes effect on the admin's next request.
 
 ## Catalog data model (web view)
 
-Backend models are `Item`, `ItemVariant`, `Category` (see `nest-backend/prisma/schema.prisma`). **`Item` is a wrapper; `ItemVariant` is the product the shopper picks** (color, stock, price). The web mirrors them in `lib/api/endpoints/types.ts`.
+Backend models are `Item`, `ItemVariant`, `Category` (see `nest-backend/prisma/schema.prisma`). **`Item` is a wrapper; `ItemVariant` is the product the shopper picks** (color, stock, price, content, and assets). The web mirrors the backend's explicit response DTOs in `lib/api/endpoints/types.ts`.
 
-Frontend assumptions that the backend will catch up to:
-
-- **`Item.itemVariants: ItemVariant[]` (1:N).** The schema is currently `itemVariant ItemVariant?` (1:1 via `@unique` on `itemId`) but the frontend assumes 1:N because a watch model has multiple colorways. Backend will flip the schema to match.
-- **Controllers include relations.** `GET /item` and `GET /item/:id` need `include: { itemVariant: true, category: true }` to be useful - without that, responses contain no price, stock, or category. Listed as a backend TODO.
-- **No `name`, no `image` on Item.** The card title is `brand`; the subtitle is `description`. Images are placeholders until a `mediaUrl` column lands and we wire Cloudinary.
+- `GET /item` returns `ItemListItem[]` in a pagination envelope, including category, price-ordered variants, and each variant's asset URL objects.
+- `GET /item/:id` returns `ItemDetails`. Variant-specific `name`, `description`, `price`, stock, and `assets` stay on each `ItemDetailsVariant`; never flatten the first variant onto the parent item.
+- The PDP keeps the selected variant in `ProductDetails`, then drives the gallery, purchase panel, specs, and cart snapshot from that one selection.
 - **`pageNumber` is 0-indexed** in `Paginated<T>.metadata`. URL params on web should map 1-indexed `?page=2` → backend `pageNumber=1`.
 - **Money is `Int` (minor units)** on `ItemVariant.price`. Web preserves this all the way through to `CartLine.unitPrice`. Never use floats.
 
@@ -203,7 +201,7 @@ web/
       errors.ts               ApiError class
       types.ts                ApiResponse / ApiErrorPayload
       endpoints/
-        types.ts              Item / ItemVariant / Category / AdminUser / Paginated<T>
+        types.ts              Endpoint contracts / Category / AdminUser / Paginated<T>
         items.ts, categories.ts        Public reads + provisional serverApi creates (server-only)
         items-client.ts, categories-client.ts   Client-side creates used by admin forms
         auth.ts, admin-users.ts        Admin reads, server-only, cookie forwarded explicitly
@@ -222,11 +220,8 @@ web/
 
 **Backend-side (tracked here because the web blocks on them):**
 
-- `item.service.ts` queries must `include: { itemVariant: true, category: true }`. Without that, `GET /item` and `GET /item/:id` return rows with no price/stock/category and the catalog cannot render.
-- Schema: `itemVariant ItemVariant?` → `itemVariants ItemVariant[]` (remove `@unique` on `itemId`). Watches need multiple colorways.
-- Enable CORS for the web origin (no credentials needed since there's no auth in v1).
-- Add a `name`/`title` column to `Item` (or rely on `brand` + `description` as the title-subtitle pair). Decide.
-- Add a media model (`Media { id, itemId, url, alt, order }`) so the catalog can ship real images via Cloudinary.
+- Implement the object-storage contract described in `docs/s3-assets-implementation-guide.md` while preserving per-variant assets in `ItemDetails`.
+- Decide whether the parent `Item` needs its own customer-facing title or whether variant names remain canonical.
 
 **Web-side:**
 

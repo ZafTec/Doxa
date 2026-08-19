@@ -1,14 +1,14 @@
 import Link from "next/link";
-import type { Item } from "@/lib/api";
+import type { ItemListItem } from "@/lib/api";
 import { itemTitle, minPrice } from "@/lib/util/item";
 import { formatPrice } from "@/lib/util/money";
 import { ProductImage } from "../product-image";
 import { Eyebrow } from "../ui/eyebrow";
 
-export function ProductCard({ item }: { item: Item }) {
+export function ProductCard({ item }: { item: ItemListItem }) {
   const title = itemTitle(item);
   const price = minPrice(item);
-  const variants = item.itemVariants ?? [];
+  const variants = item.itemVariants;
   const heroAsset = variants[0]?.assets?.[0]?.url;
 
   return (

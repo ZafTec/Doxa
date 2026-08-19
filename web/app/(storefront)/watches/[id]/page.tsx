@@ -1,9 +1,7 @@
 import { notFound } from "next/navigation";
 import { ApiError, itemsApi } from "@/lib/api";
 import { Breadcrumbs } from "@/app/components/pdp/breadcrumbs";
-import { Gallery } from "@/app/components/pdp/gallery";
-import { PurchasePanel } from "@/app/components/pdp/purchase-panel";
-import { SpecList } from "@/app/components/pdp/spec-list";
+import { ProductDetails } from "@/app/components/pdp/product-details";
 import { Related } from "@/app/components/pdp/related";
 
 type Params = Promise<{ id: string }>;
@@ -18,8 +16,9 @@ export default async function ProductPage({ params }: { params: Params }) {
 
   if (!details) notFound();
 
-  const variants = details.variants?.itemVariants ?? [];
-  const categoryName = details.category?.name;
+  const defaultVariant =
+    details.variants.find((variant) => variant.stockQuantity > 0) ?? details.variants[0];
+  const categoryName = details.category.name;
 
   const related = await itemsApi
     .list({
@@ -43,25 +42,11 @@ export default async function ProductPage({ params }: { params: Params }) {
                 },
               ]
             : []),
-          { label: details.brand },
+          { label: defaultVariant?.name ?? details.brand },
         ]}
       />
 
-      <div className="grid grid-cols-1 gap-16 lg:grid-cols-[60%_40%] lg:gap-24">
-        <Gallery brand={details.brand} assets={details.assets} placeholderKey={details.id} />
-        <div className="space-y-12">
-          <PurchasePanel
-            itemId={details.id}
-            brand={details.brand}
-            name={details.name}
-            description={details.description}
-            price={details.price}
-            variants={variants}
-            imageSrc={details.assets[0]}
-          />
-          <SpecList brand={details.brand} variants={variants} />
-        </div>
-      </div>
+      <ProductDetails details={details} />
 
       <Related items={related} />
     </main>

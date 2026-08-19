@@ -20,9 +20,10 @@ export type {
   ISODateString,
   Item,
   ItemDetails,
+  ItemDetailsVariant,
+  ItemListItem,
   ItemListQuery,
   ItemVariant,
-  ItemVariantSummary,
   Paginated,
   UpdateAdminUserRolePayload,
 } from "./endpoints/types";
