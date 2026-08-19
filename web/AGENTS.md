@@ -98,14 +98,79 @@ Conventions:
 - Shared schemas live in `lib/validation/schemas.ts`. Login/signup are gone (no auth in v1); address/checkout/payment schemas land when those flows do.
 - Zod v4 is in use - `ZodType<Output, Input>` ordering matters for resolver typing; do not change `useZodForm`'s generics without re-typechecking.
 
-## Design tokens & typography
+## Design language
 
-**All design tokens live in `app/globals.css`** - never inline hex values in components, never use `bg-[var(--background)]` arbitrary syntax.
+Doxa reads as **precision-machined, monochrome, editorial** - zero border-radius on
+every structural surface, borders (never shadows) for containment, and wide-tracked
+uppercase micro-labels for anything secondary. This is the whole language; extend it,
+don't add to it. Reusable primitives for it live in `app/components/ui/`.
 
-- Tokens are declared as CSS vars on `:root` (light) and `.dark` (dark mode), then exposed to Tailwind via `@theme inline`. Current semantic tokens: `background`, `foreground`, `muted`, `muted-foreground`, `border`, `accent`, `accent-foreground`. Use them through Tailwind utilities: `bg-background`, `text-foreground`, `border-border`, `bg-muted`, `text-muted-foreground`, `bg-accent text-accent-foreground`.
-- Manual dark mode is wired via `@custom-variant dark (&:where(.dark, .dark *))`. The `dark` class on `<html>` is toggled by (a) an inline `<head>` script that runs pre-paint to avoid FOUC, and (b) `ThemeEffect` which reaffirms after hydration and subscribes to `prefers-color-scheme` when `theme === "system"`.
-- **Typography:** primary is **Mona Sans** loaded via `next/font/google` (`Mona_Sans`) and exposed as `--font-sans`. Mono is **Geist Mono** as `--font-mono`. The Tailwind `--font-sans` / `--font-mono` chains add a professional system-UI fallback (`ui-sans-serif, system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif` and `ui-monospace, SFMono-Regular, Menlo, "Courier New", monospace`) so text stays sharp before the webfont arrives and on rendering failures.
-- To add a new token: declare it on `:root` and `.dark`, expose it under `@theme inline` (e.g. `--color-success: var(--success)`), then use `bg-success` etc. in components.
+**All design tokens live in `app/globals.css`** - never inline hex values in components,
+never use `bg-[var(--background)]` arbitrary syntax.
+
+- Tokens are declared as CSS vars on `:root` (light) and `.dark` (dark mode), then
+  exposed to Tailwind via `@theme inline`. Semantic tokens: `background`, `foreground`,
+  `muted`, `muted-foreground`, `border`, `accent`, `accent-foreground`. Use them through
+  Tailwind utilities: `bg-background`, `text-foreground`, `border-border`, `bg-muted`,
+  `text-muted-foreground`, `bg-accent text-accent-foreground`.
+- Manual dark mode is wired via `@custom-variant dark (&:where(.dark, .dark *))`. The
+  `dark` class on `<html>` is toggled by (a) an inline `<head>` script that runs
+  pre-paint to avoid FOUC, and (b) `ThemeEffect` which reaffirms after hydration and
+  subscribes to `prefers-color-scheme` when `theme === "system"`.
+- **No semantic color.** There is no red/green/amber anywhere in the system, including
+  for errors and destructive actions - deliberate, not an oversight. State is signaled
+  through weight, underline, opacity and fill, never hue: form errors are
+  `text-foreground underline decoration-2 underline-offset-2`; disabled is
+  `opacity-40 cursor-not-allowed`; a selected/active state is `border-accent` (plus
+  `bg-accent text-accent-foreground` when it must read as "on"). If a future page
+  genuinely needs a severity color (e.g. a live inventory alert), raise it as a design
+  decision first rather than reaching for `red-500`.
+- **Typography:** primary is **Mona Sans** loaded via `next/font/google` (`Mona_Sans`)
+  and exposed as `--font-sans`. Mono is **Geist Mono** as `--font-mono`. The Tailwind
+  `--font-sans` / `--font-mono` chains add a professional system-UI fallback
+  (`ui-sans-serif, system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif`
+  and `ui-monospace, SFMono-Regular, Menlo, "Courier New", monospace`) so text stays
+  sharp before the webfont arrives and on rendering failures.
+  - Headlines: `font-semibold`, tight/negative tracking (`tracking-tight` or
+    `tracking-[-0.02em]`), tight leading. Sizes run from `text-2xl` (admin page titles)
+    up to the hero's `text-[56px]`.
+  - Body: `text-sm` or `text-base`, `text-muted-foreground` for secondary copy,
+    `leading-[1.55]` for anything longer than a line.
+  - Eyebrow/micro-label (brand kickers, section labels, stock/status text, table
+    headers): always `text-[11px] font-medium uppercase tracking-[0.08em]
+    text-muted-foreground` - use the `<Eyebrow>` primitive rather than retyping this.
+  - Numerals (price, quantity, counts) always get `tabular-nums`.
+- **Radius:** flat by default. Buttons, inputs, cards, chips, panels: **no radius at
+  all**. The only rounded things are icon-only affordances (`IconButton`, Tailwind's
+  default `rounded`, ~4px) and circular swatches/avatars (`rounded-full`). If something
+  new wants a radius beyond those two cases, it's off-language.
+- **Containment:** a 1px `border-border` is the only way to box something in. There are
+  no shadows anywhere in the system - don't add `shadow-*` utilities.
+- **Motion:** `transition-colors` for hover states that only change color/background;
+  `transition` (or `transition-opacity`) where a primary button's hover fades opacity.
+  Durations: default (150ms) for hover/focus feedback, `duration-500` for large-surface
+  moments (the product-card image zoom on hover is the reference).
+- **Focus:** handled once, globally, in `globals.css` - a `:focus-visible { outline: 2px
+  solid var(--accent); outline-offset: 2px }` base rule. Don't add per-component focus
+  styles; if the default outline looks wrong somewhere, fix the base rule, not the
+  component.
+- **Buttons have two registers**, both real, don't blend them:
+  1. *Prominent CTA* - normal-case, `text-sm font-medium` (hero CTA, "Add to bag").
+     Use `<Button>` / `buttonVariants()` from `ui/button.tsx` (variants
+     `primary`/`secondary`/`ghost`, sizes `sm`/`md`/`lg` = `h-9`/`h-12`/`h-14`).
+  2. *Compact action* - `text-xs font-medium uppercase tracking-[0.08em]` (admin
+     toolbar actions like "New item", row actions like "Remove"). This is typographic,
+     not a button component - it's the same treatment as `<Eyebrow>` on an interactive
+     element; don't force it through `<Button>`, which is normal-case only.
+- **Primitives** (`app/components/ui/`): `Button`/`buttonVariants`, `IconButton`,
+  `Input`/`Textarea`/`Select` (+ `inputClassName`/`inputClassNameCompact`),
+  `Badge`/`badgeVariants` (the active-filter chip pattern - `subtle`/`outline`/`solid`),
+  `Card` (a bordered panel, no shadow), `Eyebrow`/`eyebrowClassName`. Reach for these
+  before writing a new inline class string; if a pattern repeats a third time outside
+  `ui/`, promote it into one instead.
+- To add a new token: declare it on `:root` and `.dark`, expose it under `@theme inline`
+  (e.g. `--color-success: var(--success)`), then use `bg-success` etc. in components -
+  but see "No semantic color" above before adding a hue.
 
 ## Images & CDN
 
@@ -121,6 +186,11 @@ web/
   app/
     (storefront)/               Guest-only storefront, wrapped in SiteHeader/Sidebar/Cart/Footer
       page.tsx, watches/[id]/
+    components/                  Shared across storefront + admin
+      ui/                          Design-language primitives - Button, IconButton, Input/
+                                    Textarea/Select, Badge, Card, Eyebrow (see "Design language")
+      catalog/, pdp/                Storefront-specific (ProductCard, Gallery, PurchasePanel, ...)
+      site-header.tsx, site-footer.tsx, cart-button.tsx, cart-drawer.tsx, theme-toggle.tsx
     admin/                       Admin panel - no storefront chrome
       login/                      Public: Google sign-in link
       (protected)/                 Auth-gated via layout.tsx -> GET /auth/me
