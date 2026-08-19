@@ -1,3 +1,6 @@
+import { Eyebrow } from "@/app/components/ui/eyebrow";
+import { buttonVariants } from "@/app/components/ui/button";
+
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000";
@@ -13,9 +16,9 @@ export default async function AdminLoginPage({
   return (
     <div className="flex min-h-full flex-1 items-center justify-center bg-background px-6">
       <div className="w-full max-w-sm border border-border p-8">
-        <span className="mb-1 block text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground">
+        <Eyebrow as="span" className="mb-1 block">
           Doxa
-        </span>
+        </Eyebrow>
         <h1 className="mb-6 text-2xl font-semibold tracking-tight">Admin sign in</h1>
 
         {error === "not_authorized" && (
@@ -25,10 +28,7 @@ export default async function AdminLoginPage({
           </p>
         )}
 
-        <a
-          href={`${API_URL}/auth/google`}
-          className="flex h-14 w-full items-center justify-center gap-3 bg-accent text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90"
-        >
+        <a href={`${API_URL}/auth/google`} className={buttonVariants({ size: "lg", className: "w-full" })}>
           <GoogleMark />
           Continue with Google
         </a>
