@@ -28,7 +28,15 @@ export function ThemeToggle() {
   }
 
   return (
-    <IconButton onClick={handleClick} aria-label={`Theme: ${theme} (click for ${next})`}>
+    <IconButton
+      onClick={handleClick}
+      aria-label={`Theme: ${theme} (click for ${next})`}
+      // theme is also unknown to the server for the same reason as the
+      // click bug above - the label briefly says "system" until localStorage
+      // rehydrates. Cosmetic (screen readers only), so suppress rather than
+      // gate the whole button behind a mount check.
+      suppressHydrationWarning
+    >
       <Contrast className="size-5" />
     </IconButton>
   );
