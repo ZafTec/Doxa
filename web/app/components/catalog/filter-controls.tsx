@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Check, ChevronDown } from "lucide-react";
+import { Button } from "../ui/button";
+import { badgeVariants } from "../ui/badge";
 
 export type FilterOption = {
   value: string;
@@ -52,13 +54,9 @@ export function FilterControls({ brands, categories }: FilterControlsProps) {
           onChange={(category) => commit({ category })}
         />
         {(activeBrands.length > 0 || activeCategories.length > 0) && (
-          <button
-            type="button"
-            onClick={() => commit({ brand: [], category: [] })}
-            className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground"
-          >
+          <Button variant="ghost" size="xs" onClick={() => commit({ brand: [], category: [] })}>
             Clear all
-          </button>
+          </Button>
         )}
       </div>
     </section>
@@ -113,19 +111,17 @@ function MultiSelectMenu({
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
-        className={
-          "flex items-center gap-2 border px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.08em] transition-colors " +
-          (selected.length > 0
-            ? "border-accent bg-accent text-accent-foreground"
-            : "border-border text-foreground hover:bg-muted")
-        }
+        className={badgeVariants({
+          variant: selected.length > 0 ? "solid" : "outline",
+          className: "gap-2 active:scale-[0.97] " + (selected.length === 0 ? "hover:bg-muted" : ""),
+        })}
       >
         {summary}
         <ChevronDown className="size-3" />
       </button>
 
       {open && (
-        <div className="absolute left-0 top-full z-30 mt-2 w-56 border border-border bg-background py-2 shadow-sm">
+        <div className="absolute left-0 top-full z-30 mt-2 w-56 border border-border bg-background py-2">
           {options.length === 0 ? (
             <span className="block px-3 py-2 text-xs text-muted-foreground">
               No options yet.
