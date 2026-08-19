@@ -5,6 +5,9 @@ import { Minus, Plus, X } from "lucide-react";
 import { useCartStore, useUiStore, type CartLine } from "@/lib/store";
 import { formatPrice } from "@/lib/util/money";
 import { ProductImage } from "./product-image";
+import { IconButton } from "./ui/icon-button";
+import { Eyebrow } from "./ui/eyebrow";
+import { Button } from "./ui/button";
 
 export function CartDrawer() {
   const open = useUiStore((s) => s.cartOpen);
@@ -38,14 +41,9 @@ export function CartDrawer() {
               {totalItems} {totalItems === 1 ? "item" : "items"}
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() => setOpen(false)}
-            aria-label="Close bag"
-            className="rounded p-1 transition-colors hover:bg-muted"
-          >
+          <IconButton size="sm" onClick={() => setOpen(false)} aria-label="Close bag">
             <X className="size-5" />
-          </button>
+          </IconButton>
         </header>
 
         <div className="flex-1 overflow-y-auto px-6 py-4">
@@ -63,9 +61,7 @@ export function CartDrawer() {
         {lines.length > 0 && (
           <footer className="border-t border-border px-6 py-5">
             <div className="mb-4 flex items-baseline justify-between">
-              <span className="text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground">
-                Subtotal
-              </span>
+              <Eyebrow>Subtotal</Eyebrow>
               <span className="text-base font-medium tabular-nums">
                 {formatPrice(subtotal)}
               </span>
@@ -73,12 +69,7 @@ export function CartDrawer() {
             <p className="mb-4 text-xs text-muted-foreground">
               Shipping and taxes calculated at checkout.
             </p>
-            <button
-              type="button"
-              className="h-12 w-full bg-accent text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90"
-            >
-              Checkout
-            </button>
+            <Button className="w-full">Checkout</Button>
           </footer>
         )}
       </aside>
@@ -124,9 +115,7 @@ function CartRow({ line }: { line: CartLine }) {
       </Link>
 
       <div className="flex flex-1 flex-col gap-1">
-        <span className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
-          {line.brand}
-        </span>
+        <Eyebrow>{line.brand}</Eyebrow>
         <span className="text-sm font-medium leading-tight">{line.description}</span>
         <span className="text-xs text-muted-foreground">{line.color}</span>
 
@@ -156,22 +145,22 @@ function CartRow({ line }: { line: CartLine }) {
               {formatPrice(line.unitPrice)}
             </span>
             {line.quantity > 1 && (
-              <span className="text-[10px] uppercase tracking-[0.08em] text-muted-foreground tabular-nums">
+              <Eyebrow className="tabular-nums">
                 × {line.quantity} = {formatPrice(lineTotal)}
-              </span>
+              </Eyebrow>
             )}
           </div>
         </div>
       </div>
 
-      <button
-        type="button"
+      <IconButton
+        size="sm"
         onClick={() => remove(line.variantId)}
         aria-label="Remove from bag"
-        className="self-start rounded p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+        className="self-start text-muted-foreground hover:text-foreground"
       >
         <X className="size-4" />
-      </button>
+      </IconButton>
     </li>
   );
 }
