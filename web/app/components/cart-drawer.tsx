@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { Minus, Plus, X } from "lucide-react";
 import { useCartStore, useUiStore, type CartLine } from "@/lib/store";
 import { formatPrice } from "@/lib/util/money";
+import { useHasMounted } from "@/lib/util/use-has-mounted";
 import { ProductImage } from "./product-image";
 import { IconButton } from "./ui/icon-button";
 import { Eyebrow } from "./ui/eyebrow";
@@ -16,9 +17,15 @@ const drawerSpring = { type: "spring", duration: 0.35, bounce: 0.15 } as const;
 export function CartDrawer() {
   const open = useUiStore((s) => s.cartOpen);
   const setOpen = useUiStore((s) => s.setCartOpen);
-  const lines = useCartStore((s) => s.lines);
-  const subtotal = useCartStore((s) => s.subtotal());
-  const totalItems = useCartStore((s) => s.totalItems());
+  const rawLines = useCartStore((s) => s.lines);
+  const rawSubtotal = useCartStore((s) => s.subtotal());
+  const rawTotalItems = useCartStore((s) => s.totalItems());
+  // Server always renders an empty cart; only trust the persisted lines once
+  // mounted, or the real count/subtotal would diverge from the SSR markup.
+  const mounted = useHasMounted();
+  const lines = mounted ? rawLines : [];
+  const subtotal = mounted ? rawSubtotal : 0;
+  const totalItems = mounted ? rawTotalItems : 0;
 
   return (
     <>

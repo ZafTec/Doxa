@@ -2,11 +2,14 @@
 
 import { ShoppingBag } from "lucide-react";
 import { useCartStore, useUiStore } from "@/lib/store";
+import { useHasMounted } from "@/lib/util/use-has-mounted";
 import { IconButton } from "./ui/icon-button";
 
 export function CartButton() {
-  const count = useCartStore((s) => s.lines.reduce((sum, l) => sum + l.quantity, 0));
+  const rawCount = useCartStore((s) => s.lines.reduce((sum, l) => sum + l.quantity, 0));
   const toggleCart = useUiStore((s) => s.toggleCart);
+  // Server always renders an empty cart; only trust the persisted count once mounted.
+  const count = useHasMounted() ? rawCount : 0;
 
   return (
     <IconButton onClick={toggleCart} aria-label={`Cart (${count} items)`} className="relative">
