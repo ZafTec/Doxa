@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Eyebrow, eyebrowBaseClassName } from "./ui/eyebrow";
 
 const columns: Array<{ label: string; links: Array<{ label: string; href: string }> }> = [
   {
@@ -56,7 +57,10 @@ export function SiteFooter() {
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="text-xs uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground"
+                      className={
+                        eyebrowBaseClassName +
+                        " text-muted-foreground transition-colors hover:text-foreground"
+                      }
                     >
                       {link.label}
                     </Link>
@@ -70,7 +74,10 @@ export function SiteFooter() {
           </div>
         </div>
 
-        <div className="flex flex-col items-center justify-between gap-4 border-t border-border pt-8 text-[10px] uppercase tracking-[0.12em] text-muted-foreground md:flex-row">
+        <Eyebrow
+          as="div"
+          className="flex flex-col items-center justify-between gap-4 border-t border-border pt-8 md:flex-row"
+        >
           <span>© {year} Doxa Editorial. All rights reserved.</span>
           <div className="flex gap-8">
             <Link href="/legal/privacy" className="transition-colors hover:text-foreground">
@@ -80,7 +87,7 @@ export function SiteFooter() {
               Terms of Service
             </Link>
           </div>
-        </div>
+        </Eyebrow>
       </div>
     </footer>
   );
