@@ -42,3 +42,16 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans);
 }
+
+/*
+ * No interactive element in this system ships its own focus style - it's
+ * handled once, here, so every button/link/input/select gets the same
+ * accent outline. Outline (not box-shadow or ring) matches the border-driven,
+ * zero-radius language: a focus indicator is just another straight line.
+ */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+}

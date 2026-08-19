@@ -5,6 +5,7 @@ import { Menu } from "lucide-react";
 import { useUiStore } from "@/lib/store";
 import { ThemeToggle } from "./theme-toggle";
 import { CartButton } from "./cart-button";
+import { IconButton } from "./ui/icon-button";
 
 const navLinks = [
   { label: "Watches", href: "/" },
@@ -19,14 +20,9 @@ export function SiteHeader() {
     <header className="sticky top-0 z-30 h-16 border-b border-border bg-background/80 backdrop-blur">
       <div className="mx-auto flex h-full max-w-[1440px] items-center justify-between px-6 md:px-12">
         <div className="flex items-center gap-6">
-          <button
-            type="button"
-            onClick={toggleSidebar}
-            aria-label="Open menu"
-            className="rounded p-2 text-foreground transition-colors hover:bg-muted"
-          >
+          <IconButton onClick={toggleSidebar} aria-label="Open menu">
             <Menu className="size-5" />
-          </button>
+          </IconButton>
           <Link
             href="/"
             className="text-xl font-bold tracking-[0.2em] text-foreground"

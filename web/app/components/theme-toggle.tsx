@@ -2,6 +2,7 @@
 
 import { Contrast } from "lucide-react";
 import { useUiStore, type UiState } from "@/lib/store";
+import { IconButton } from "./ui/icon-button";
 
 const order: UiState["theme"][] = ["light", "dark", "system"];
 
@@ -16,13 +17,8 @@ export function ThemeToggle() {
   const next = order[(order.indexOf(theme) + 1) % order.length];
 
   return (
-    <button
-      type="button"
-      onClick={() => setTheme(next)}
-      aria-label={`Theme: ${theme} (click for ${next})`}
-      className="rounded p-2 text-foreground transition-colors hover:bg-muted"
-    >
+    <IconButton onClick={() => setTheme(next)} aria-label={`Theme: ${theme} (click for ${next})`}>
       <Contrast className="size-5" />
-    </button>
+    </IconButton>
   );
 }

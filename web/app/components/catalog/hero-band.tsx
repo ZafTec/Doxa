@@ -2,14 +2,13 @@
 
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { Eyebrow } from "../ui/eyebrow";
 
 export function HeroBand() {
   return (
     <section className="flex h-120 w-full overflow-hidden border-b border-border">
       <div className="flex w-[42%] flex-col justify-center px-12 md:px-24">
-        <span className="mb-4 text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
-          Heritage
-        </span>
+        <Eyebrow className="mb-4">Heritage</Eyebrow>
         <h1 className="mb-6 text-[56px] font-semibold leading-none tracking-[-0.02em]">
           Built for depth,
           <br />
