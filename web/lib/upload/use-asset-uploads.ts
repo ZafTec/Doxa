@@ -136,7 +136,7 @@ export function useAssetUploads({
       inFlight.current.add(item.id);
       void runUpload(item);
     });
-  }, [items, runUpload]);
+  }, [items]);
 
   const addFiles = useCallback(
     (files: File[]) => {

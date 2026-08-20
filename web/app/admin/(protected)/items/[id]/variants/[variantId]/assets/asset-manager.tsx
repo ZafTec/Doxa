@@ -279,7 +279,13 @@ export function AssetManager({
 function isOptimizableHost(url: string): boolean {
   try {
     const { hostname } = new URL(url);
-    return hostname === "storage.zaftech.co" || hostname === "localhost";
+    // "localhost" is in next.config.ts's remotePatterns for dev, but
+    // Next's image optimizer independently refuses any upstream host that
+    // resolves to a private IP (its own SSRF hardening) - "localhost"
+    // always does, so it can never actually be optimized. Serve it as a
+    // plain <img> via `unoptimized` instead of a permanently-400ing
+    // /_next/image request.
+    return hostname === "storage.zaftech.co";
   } catch {
     return false;
   }
