@@ -1,0 +1,226 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-20T00:00:00Z",
+  "title": "Design System: Doxa",
+  "extensions": {
+    "colorMeta": {
+      "ink": {
+        "role": "primary",
+        "displayName": "Ink",
+        "canonical": "oklch(23% 0.003 286)",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(23% 0.003 286)",
+          "oklch(32% 0.003 286)",
+          "oklch(45% 0.003 286)",
+          "oklch(58% 0.003 286)",
+          "oklch(70% 0.003 286)",
+          "oklch(85% 0.003 286)",
+          "oklch(95% 0 0)"
+        ]
+      },
+      "ink-inverse": {
+        "role": "primary",
+        "displayName": "Ink Inverse",
+        "canonical": "oklch(98% 0 0)",
+        "tonalRamp": [
+          "oklch(95% 0 0)",
+          "oklch(98% 0 0)",
+          "oklch(99% 0 0)",
+          "oklch(100% 0 0)"
+        ]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Paper",
+        "canonical": "oklch(100% 0 0)",
+        "tonalRamp": [
+          "oklch(9% 0 0)",
+          "oklch(20% 0 0)",
+          "oklch(35% 0 0)",
+          "oklch(50% 0 0)",
+          "oklch(65% 0 0)",
+          "oklch(80% 0 0)",
+          "oklch(92% 0 0)",
+          "oklch(100% 0 0)"
+        ]
+      },
+      "paper-text": {
+        "role": "neutral",
+        "displayName": "Paper Text",
+        "canonical": "oklch(22% 0 0)",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(22% 0 0)",
+          "oklch(35% 0 0)",
+          "oklch(50% 0 0)",
+          "oklch(65% 0 0)",
+          "oklch(80% 0 0)",
+          "oklch(90% 0 0)",
+          "oklch(96% 0 0)"
+        ]
+      },
+      "paper-muted": {
+        "role": "neutral",
+        "displayName": "Paper Muted",
+        "canonical": "oklch(96% 0.001 286)",
+        "tonalRamp": [
+          "oklch(20% 0.001 286)",
+          "oklch(30% 0.001 286)",
+          "oklch(45% 0.001 286)",
+          "oklch(60% 0.001 286)",
+          "oklch(75% 0.001 286)",
+          "oklch(88% 0.001 286)",
+          "oklch(96% 0.001 286)",
+          "oklch(99% 0 0)"
+        ]
+      },
+      "paper-muted-text": {
+        "role": "neutral",
+        "displayName": "Paper Muted Text",
+        "canonical": "oklch(54% 0.003 286)",
+        "tonalRamp": [
+          "oklch(30% 0.003 286)",
+          "oklch(40% 0.003 286)",
+          "oklch(48% 0.003 286)",
+          "oklch(54% 0.003 286)",
+          "oklch(63% 0.003 286)",
+          "oklch(72% 0.003 286)",
+          "oklch(82% 0.003 286)",
+          "oklch(90% 0.003 286)"
+        ]
+      },
+      "paper-border": {
+        "role": "neutral",
+        "displayName": "Paper Border",
+        "canonical": "oklch(91% 0 0)",
+        "tonalRamp": [
+          "oklch(25% 0 0)",
+          "oklch(35% 0 0)",
+          "oklch(50% 0 0)",
+          "oklch(65% 0 0)",
+          "oklch(78% 0 0)",
+          "oklch(85% 0 0)",
+          "oklch(91% 0 0)",
+          "oklch(97% 0 0)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Storefront hero headline only - one use per page, at most." },
+      "headline": { "displayName": "Headline", "purpose": "Page-level titles on content pages (contact, newsletter, legal, error/placeholder states)." },
+      "title": { "displayName": "Title", "purpose": "Admin page titles and in-page section headers." },
+      "body": { "displayName": "Body", "purpose": "Primary and secondary copy; PDP descriptions." },
+      "label": { "displayName": "Label", "purpose": "Brand kickers, section labels, stock/status text, table headers - always via the Eyebrow primitive." },
+      "mono": { "displayName": "Mono", "purpose": "Reserved for tabular numerals (price, quantity, counts), never run as body text." }
+    },
+    "shadows": [],
+    "motion": [
+      { "name": "feedback", "value": "150ms ease (transition-colors / transition-opacity)", "purpose": "Default hover/focus feedback for color, background, and opacity changes." },
+      { "name": "large-surface", "value": "500ms", "purpose": "Large-surface moments, e.g. the product-card image hover-zoom." },
+      { "name": "press-scale", "value": "transform: scale(0.97) button / scale(0.94) icon button", "purpose": "Active/press feedback in place of a color change." },
+      { "name": "morph", "value": "320ms View Transition with a mid-flight blur keyframe", "purpose": "Signature catalog/related card -> PDP gallery image hand-off." },
+      { "name": "reduced-motion", "value": "0s under prefers-reduced-motion: reduce", "purpose": "Every animation, including the signature morph, collapses under reduced motion." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" },
+      { "name": "2xl", "value": "1536px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Prominent CTA register - hero, \"Add to bag\".",
+      "html": "<button class=\"ds-btn-primary\">Add to bag</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 48px; padding: 0 24px; background: var(--accent); color: var(--accent-foreground); font-size: 14px; font-weight: 500; white-space: nowrap; border: none; border-radius: 0; transition: opacity 0.15s, transform 0.15s; } .ds-btn-primary:hover { opacity: 0.9; } .ds-btn-primary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; } .ds-btn-primary:active { transform: scale(0.97); } .ds-btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Bordered, transparent-fill counterpart to the primary button.",
+      "html": "<button class=\"ds-btn-secondary\">View details</button>",
+      "css": ".ds-btn-secondary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 48px; padding: 0 24px; background: transparent; color: var(--foreground); border: 1px solid var(--border); border-radius: 0; font-size: 14px; font-weight: 500; transition: border-color 0.15s, transform 0.15s; } .ds-btn-secondary:hover { border-color: var(--muted-foreground); } .ds-btn-secondary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; } .ds-btn-secondary:active { transform: scale(0.97); } .ds-btn-secondary:disabled { opacity: 0.4; cursor: not-allowed; }"
+    },
+    {
+      "name": "Badge",
+      "kind": "chip",
+      "refersTo": "badge-subtle",
+      "description": "Active-filter / state-as-label chip - no color coding, weight and fill only.",
+      "html": "<span class=\"ds-badge\">In Stock</span>",
+      "css": ".ds-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; background: var(--muted); color: var(--foreground); border-radius: 0; transition: background-color 0.15s; }"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "The one containment device in the system: a flat, bordered panel.",
+      "html": "<div class=\"ds-card\">Card content</div>",
+      "css": ".ds-card { background: var(--background); color: var(--foreground); border: 1px solid var(--border); border-radius: 0; padding: 24px; }"
+    },
+    {
+      "name": "Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Text field - flat, bordered, focus signaled by border color plus the global outline.",
+      "html": "<input class=\"ds-input\" type=\"text\" placeholder=\"Search watches\" />",
+      "css": ".ds-input { width: 100%; background: var(--background); color: var(--foreground); border: 1px solid var(--border); border-radius: 0; padding: 8px 12px; font-size: 14px; outline: none; transition: border-color 0.15s; } .ds-input:focus { border-color: var(--accent); } .ds-input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; } .ds-input:disabled { opacity: 0.4; cursor: not-allowed; }"
+    },
+    {
+      "name": "Eyebrow Label",
+      "kind": "custom",
+      "refersTo": "label",
+      "description": "Wide-tracked uppercase micro-label used for brand kickers, section labels, and status text.",
+      "html": "<span class=\"ds-eyebrow\">New Arrivals</span>",
+      "css": ".ds-eyebrow { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted-foreground); }"
+    },
+    {
+      "name": "The Doxa Face",
+      "kind": "custom",
+      "refersTo": "signature",
+      "description": "The system's one illustrated signature - a stroke-only watch case drawn as a face, shown here in its calm (10:10) mood. Used across empty and error states.",
+      "html": "<svg class=\"ds-doxa-face\" viewBox=\"0 0 120 120\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" aria-hidden=\"true\"><path d=\"M50 16h20M50 104h20\" stroke-width=\"3\" /><rect x=\"102\" y=\"52\" width=\"10\" height=\"16\" rx=\"2\" stroke-width=\"2.5\" /><circle cx=\"60\" cy=\"60\" r=\"44\" stroke-width=\"3\" /><circle cx=\"60\" cy=\"60\" r=\"38\" stroke-width=\"1.5\" opacity=\"0.35\" /><circle cx=\"46\" cy=\"54\" r=\"3\" fill=\"currentColor\" stroke=\"none\" /><circle cx=\"74\" cy=\"54\" r=\"3\" fill=\"currentColor\" stroke=\"none\" /><path d=\"M60 60 44 40M60 60 78 40\" stroke-width=\"3\" /></svg>",
+      "css": ".ds-doxa-face { width: 96px; height: 96px; color: var(--muted-foreground); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Watchmaker's Bench",
+    "overview": "Doxa reads like tools laid out in precise, deliberate order on a bench: nothing decorative, nothing that isn't load-bearing. Every surface is flat, every edge is a straight 1px line, and the only accent is ink-on-paper (or paper-on-ink in dark mode) - there is no hue doing semantic work anywhere in the system, not even for errors. Hierarchy comes from weight, tracking, and restraint rather than color or shadow. Wide-tracked uppercase micro-labels stand in for the legends and gauge-markings a bench of precision instruments would carry. This is a real, pre-launch commerce product built on trust through price/value transparency, not a portfolio piece - the visual language is doing real work: a shopper who isn't a watch expert should feel like nothing is being hidden or oversold to them. The system rejects both directions a watch retailer could default to: the gold-gradient, serif-heavy \"heritage luxury\" cliche, and the bright, rounded, playful DTC-ecommerce default. It sits deliberately between them - serious but not ornate, warm but not cute. Motion is not an afterthought bolted onto a static system; it is one of the system's few expressive tools precisely because color isn't available for that job. Use it deliberately and consistently, never decoratively.",
+    "keyCharacteristics": [
+      "Zero border-radius on every structural surface; radius is reserved for two narrow exceptions (icon affordances, circular swatches/avatars).",
+      "Containment is always a 1px border - there are no shadows anywhere in the system.",
+      "No semantic color: state is signaled through weight, underline, opacity, and fill only.",
+      "Wide-tracked uppercase micro-labels (Eyebrow) do the work color-coding would do elsewhere.",
+      "One illustrated signature (The Doxa Face) stands in for every icon/illustration need tied to system or empty states - no emoji, no stock icon sets.",
+      "Motion is purposeful and consistent: short, functional transitions plus one signature view-transition morph, never ambient decoration."
+    ],
+    "rules": [
+      { "name": "The Ink Discipline Rule", "body": "Ink (the accent) never appears as a large fill. It marks a single active/selected/primary element at a time - a filled button, a selected swatch, a solid badge, a focus outline. If a screen needs to signal more than one thing at once, reach for weight or a border, not a second use of Ink.", "section": "colors" },
+      { "name": "The No Hue Rule", "body": "There is no red/green/amber anywhere in the system, including for form errors and destructive actions. Errors are text-foreground underline decoration-2 underline-offset-2; disabled is opacity-40; selected is border-accent (plus bg-accent text-accent-foreground when it must read fully \"on\"). A genuinely new severity need is a design decision to raise explicitly, not a reach for red-500.", "section": "colors" },
+      { "name": "The One Family Rule", "body": "Every text role is Mona Sans. A second typeface is never introduced to signal hierarchy - size, weight, tracking, and case already do that job.", "section": "typography" },
+      { "name": "The Tabular Numerals Rule", "body": "Price, quantity, and count digits always carry tabular-nums so they don't visually jitter as they update or align in a column.", "section": "typography" },
+      { "name": "The Border-Only Rule", "body": "If something needs to look contained, separated, or \"above\" its surroundings, the answer is a 1px border, never a shadow. This is an invariant, not a starting point to relax later.", "section": "elevation" },
+      { "name": "The Purposeful Motion Rule", "body": "Motion always marks a real state change or hand-off (hover, press, selection, a navigation transition) - never runs as ambient decoration. Consistency and restraint matter more than novelty: reuse the existing duration/easing vocabulary before inventing a new one.", "section": "components" }
+    ],
+    "dos": [
+      "Do use a 1px border-border for every containment need - cards, inputs, dividers, panels.",
+      "Do route all text through the five typographic roles (Display/Headline/Title/Body/Label) and their exact weight/tracking values rather than picking an arbitrary size.",
+      "Do signal state (error, disabled, selected, active) through weight, underline, opacity, or fill - never through hue.",
+      "Do keep motion purposeful and consistent with the existing duration/easing vocabulary (150ms feedback, 500ms large-surface, the 320ms morph).",
+      "Do reach for The Doxa Face before any other icon/illustration for empty or error states."
+    ],
+    "donts": [
+      "Don't add shadow-* utilities anywhere - depth is a border, never a shadow.",
+      "Don't add a radius to a structural surface (buttons, inputs, cards, chips, panels) - the only exceptions are small icon affordances and circular elements.",
+      "Don't reach for red-500/green-500/amber-500 or any semantic hue for errors, warnings, or success states - use weight/underline/opacity/fill instead, and raise a genuinely new severity need as a design decision first.",
+      "Don't drift toward gold-gradient \"heritage luxury\" styling or bright, rounded, playful DTC-ecommerce styling - the system sits deliberately between both.",
+      "Don't introduce a second illustration style, emoji, or stock icon set alongside The Doxa Face.",
+      "Don't animate decoratively - every transition should be traceable to a real state change or hand-off."
+    ]
+  }
+}
