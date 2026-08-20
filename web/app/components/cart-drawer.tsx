@@ -10,6 +10,7 @@ import { ProductImage } from "./product-image";
 import { IconButton } from "./ui/icon-button";
 import { Eyebrow } from "./ui/eyebrow";
 import { Button } from "./ui/button";
+import { DoxaAvatar } from "./ui/doxa-avatar";
 
 // Subtle, Apple-style spring: settles like a physical panel, not a bounce toy.
 const drawerSpring = { type: "spring", duration: 0.35, bounce: 0.15 } as const;
@@ -95,6 +96,7 @@ function EmptyCart() {
   const setOpen = useUiStore((s) => s.setCartOpen);
   return (
     <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
+      <DoxaAvatar mood="calm" className="size-14 text-muted-foreground" />
       <p className="text-sm text-muted-foreground">Your bag is empty.</p>
       <Link
         href="/"
