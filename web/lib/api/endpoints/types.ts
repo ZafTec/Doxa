@@ -46,8 +46,16 @@ export type ItemDetailsVariant = {
 
 export type Asset = {
   id: string;
+  /** MinIO object key. Null for legacy externally-hosted assets. */
+  key: string | null;
   url: string;
+  originalName: string | null;
+  contentType: string | null;
+  size: number | null;
+  etag: string | null;
+  position: number;
   itemVariantId: string;
+  createdAt: ISODateString;
 };
 
 export type Item = {
@@ -111,9 +119,58 @@ export type CreateItemVariantPayload = {
   stockQuantity: number;
 };
 
-export type CreateAssetPayload = {
+/**
+ * Response shape of `POST /item/createItemVariant` - the raw Prisma row,
+ * with no `assets` relation loaded (unlike `ItemVariant`, which is the
+ * list-endpoint shape and always includes it).
+ */
+export type CreatedItemVariant = {
+  id: string;
+  itemId: string;
+  color: string;
+  stockQuantity: number;
+  price: number;
+  description: string;
+  name: string;
+};
+
+export const ALLOWED_ASSET_IMAGE_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/avif",
+] as const;
+
+export type AssetImageType = (typeof ALLOWED_ASSET_IMAGE_TYPES)[number];
+
+export const MAX_ASSET_IMAGE_SIZE = 10 * 1024 * 1024;
+export const MAX_ASSETS_PER_VARIANT = 8;
+
+export type PresignAssetUploadPayload = {
   itemVariantId: string;
-  urls: string[];
+  fileName: string;
+  contentType: AssetImageType;
+  size: number;
+};
+
+export type PresignAssetUploadTicket = {
+  key: string;
+  uploadUrl: string;
+  expiresIn: number;
+  headers: Record<string, string>;
+};
+
+export type CompleteAssetUploadPayload = {
+  itemVariantId: string;
+  key: string;
+  originalName: string;
+  expectedContentType: AssetImageType;
+  expectedSize: number;
+};
+
+export type ImportAssetFromUrlPayload = {
+  itemVariantId: string;
+  url: string;
 };
 
 export type CreateCategoryPayload = {
