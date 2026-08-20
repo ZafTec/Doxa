@@ -1,8 +1,6 @@
 import type { Provider } from '@nestjs/common';
 import { S3Client } from 'bun';
-
-export const INTERNAL_S3 = Symbol('INTERNAL_S3');
-export const PUBLIC_S3_SIGNER = Symbol('PUBLIC_S3_SIGNER');
+import { INTERNAL_S3, PUBLIC_S3_SIGNER } from './asset-storage.tokens';
 
 function requiredEnv(name: string): string {
   const value = process.env[name];
