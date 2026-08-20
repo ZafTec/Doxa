@@ -191,15 +191,28 @@ export class AssetService {
     await this.requireItemVariant(dto.itemVariantId);
     await this.enforceAssetCapacity(dto.itemVariantId);
 
-    const sourceUrl = assertPublicHttpUrl(dto.url);
+    const sourceUrl = await assertPublicHttpUrl(dto.url);
 
     let response: Response;
     try {
       response = await fetch(sourceUrl, {
+        // Never follow redirects: a URL that passed the SSRF guard could
+        // otherwise 3xx to an internal address at fetch time.
+        redirect: 'manual',
         signal: AbortSignal.timeout(URL_FETCH_TIMEOUT_MS),
       });
     } catch {
       throw new BadRequestException('Could not fetch the image URL');
+    }
+    // Bun's fetch doesn't surface `redirect: "manual"` redirects as
+    // `type: "opaqueredirect"` (unlike spec/browser fetch) - it returns the
+    // raw 3xx response instead, without following it. Check the status
+    // range directly so the intent survives either behavior.
+    if (
+      response.type === 'opaqueredirect' ||
+      (response.status >= 300 && response.status < 400)
+    ) {
+      throw new BadRequestException('URL must not redirect');
     }
     if (!response.ok) {
       throw new BadRequestException(
