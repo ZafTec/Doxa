@@ -55,6 +55,7 @@ spacing:
   lg: "48px"
   container-padding: "24px"
   container-padding-md: "48px"
+  container-padding-lg: "80px"
 components:
   button-primary:
     backgroundColor: "{colors.ink}"
@@ -190,8 +191,11 @@ introduced to signal hierarchy - size, weight, tracking, and case already do tha
 ## Layout
 
 Content is capped at a `1440px` container (`mx-auto max-w-[1440px]`) with responsive
-horizontal padding (`px-6` mobile, `md:px-12` at medium and up, occasionally `lg:px-20/24`
-on the widest storefront pages). Narrow, single-column content pages (contact, newsletter,
+horizontal padding: `px-6` mobile, `md:px-12` at medium and up, `lg:px-20` at the largest
+breakpoint. This exact `px-6 md:px-12 lg:px-20` scale is shared by every full-width
+section - header, footer, hero, filter row, catalog grid, PDP - so their content shares
+one left/right edge at every viewport width; don't introduce a fourth variant. Narrow,
+single-column content pages (contact, newsletter,
 legal, placeholder/error states) use a tighter centered container (480-720px) instead of
 the full-width grid. The header is a fixed `h-16` bar; the cart drawer is a fixed
 `max-w-[420px]` panel sliding from the right edge.

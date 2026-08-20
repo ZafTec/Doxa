@@ -39,25 +39,27 @@ export function FilterControls({ brands, categories }: FilterControlsProps) {
   }
 
   return (
-    <section className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-6 py-3 md:px-12">
-      <div className="flex flex-wrap items-center gap-3">
-        <MultiSelectMenu
-          label="Brand"
-          options={brands}
-          selected={activeBrands}
-          onChange={(brand) => commit({ brand })}
-        />
-        <MultiSelectMenu
-          label="Category"
-          options={categories}
-          selected={activeCategories}
-          onChange={(category) => commit({ category })}
-        />
-        {(activeBrands.length > 0 || activeCategories.length > 0) && (
-          <Button variant="ghost" size="xs" onClick={() => commit({ brand: [], category: [] })}>
-            Clear all
-          </Button>
-        )}
+    <section className="border-b border-border">
+      <div className="mx-auto flex max-w-[1440px] flex-wrap items-center justify-between gap-3 px-6 py-3 md:px-12 lg:px-20">
+        <div className="flex flex-wrap items-center gap-3">
+          <MultiSelectMenu
+            label="Brand"
+            options={brands}
+            selected={activeBrands}
+            onChange={(brand) => commit({ brand })}
+          />
+          <MultiSelectMenu
+            label="Category"
+            options={categories}
+            selected={activeCategories}
+            onChange={(category) => commit({ category })}
+          />
+          {(activeBrands.length > 0 || activeCategories.length > 0) && (
+            <Button variant="ghost" size="xs" onClick={() => commit({ brand: [], category: [] })}>
+              Clear all
+            </Button>
+          )}
+        </div>
       </div>
     </section>
   );

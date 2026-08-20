@@ -18,7 +18,7 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-30 h-16 border-b border-border bg-background/80 backdrop-blur">
-      <div className="mx-auto flex h-full max-w-[1440px] items-center justify-between px-6 md:px-12">
+      <div className="mx-auto flex h-full max-w-[1440px] items-center justify-between px-6 md:px-12 lg:px-20">
         <div className="flex items-center gap-6">
           <IconButton onClick={toggleSidebar} aria-label="Open menu">
             <Menu className="size-5" />
