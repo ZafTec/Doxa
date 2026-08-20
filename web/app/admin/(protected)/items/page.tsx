@@ -2,6 +2,7 @@ import Link from "next/link";
 import { itemsApi } from "@/lib/api";
 import { buttonVariants } from "@/app/components/ui/button";
 import { Eyebrow, eyebrowBaseClassName } from "@/app/components/ui/eyebrow";
+import { AdminEmptyState } from "@/app/admin/components/empty-state";
 
 export default async function AdminItemsPage() {
   const { data: items } = await itemsApi.list({ pageSize: 50 }, { revalidate: 0 });
@@ -16,7 +17,10 @@ export default async function AdminItemsPage() {
       </div>
 
       {items.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No items yet.</p>
+        <AdminEmptyState
+          title="No items yet."
+          body={'Use "New item" above to start the catalog.'}
+        />
       ) : (
         <table className="w-full border-collapse text-sm">
           <thead>

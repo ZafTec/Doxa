@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { categoriesApi } from "@/lib/api";
 import { buttonVariants } from "@/app/components/ui/button";
+import { AdminEmptyState } from "@/app/admin/components/empty-state";
 
 export default async function AdminCategoriesPage() {
   const categories = await categoriesApi.list({ revalidate: 0 });
@@ -15,7 +16,10 @@ export default async function AdminCategoriesPage() {
       </div>
 
       {categories.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No categories yet.</p>
+        <AdminEmptyState
+          title="No categories yet."
+          body={'Use "New category" above to start organizing the catalog.'}
+        />
       ) : (
         <ul className="divide-y divide-border border-y border-border">
           {categories.map((category) => (
