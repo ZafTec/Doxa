@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Mona_Sans, Geist_Mono } from "next/font/google";
+import { MotionConfig } from "motion/react";
 import "./globals.css";
 import { ThemeEffect } from "./components/theme-effect";
 
@@ -40,7 +41,11 @@ export default function RootLayout({
       </head>
       <body className="flex min-h-full flex-col">
         <ThemeEffect />
-        {children}
+        {/* Every Motion-driven transition in the system - drawer springs, badge
+            pops, thumbnail transitions - defers to the OS reduced-motion
+            preference from one place, matching the reduced-motion guarantee
+            already made for the native view-transition morph in globals.css. */}
+        <MotionConfig reducedMotion="user">{children}</MotionConfig>
       </body>
     </html>
   );
