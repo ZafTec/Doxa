@@ -44,7 +44,7 @@ export function SiteFooter() {
   const year = 2026;
 
   return (
-    <footer className="border-t border-border bg-muted/40 px-6 py-16 md:px-12">
+    <footer className="border-t border-border bg-muted/40 px-6 py-16 md:px-12 lg:px-20">
       <div className="mx-auto max-w-[1440px]">
         <div className="mb-16 grid grid-cols-2 gap-12 md:grid-cols-5">
           {columns.map((col) => (

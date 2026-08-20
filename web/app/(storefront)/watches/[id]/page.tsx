@@ -30,7 +30,7 @@ export default async function ProductPage({ params }: { params: Params }) {
     .catch(() => []);
 
   return (
-    <main className="mx-auto max-w-[1440px] px-6 pt-12 pb-24 md:px-12 lg:px-24">
+    <main className="mx-auto max-w-[1440px] px-6 pt-12 pb-24 md:px-12 lg:px-20">
       <Breadcrumbs
         crumbs={[
           { label: "Watches", href: "/" },

@@ -17,24 +17,26 @@ export function FilterBar({
   resultLabel: string;
 }) {
   return (
-    <section className="flex items-center justify-between border-y border-border px-6 py-2 text-[11px] uppercase tracking-wider md:px-12">
-      <div className="flex items-center gap-2 overflow-x-auto py-1">
-        {filters.length === 0 ? (
-          <span className="text-muted-foreground">All watches</span>
-        ) : (
-          filters.map((f) => (
-            <Link
-              key={f.key}
-              href={f.removeHref}
-              className={badgeVariants({ className: "normal-case" })}
-            >
-              <span>{f.label}</span>
-              <X className="size-3" />
-            </Link>
-          ))
-        )}
+    <section className="border-y border-border text-[11px] uppercase tracking-wider">
+      <div className="mx-auto flex max-w-[1440px] items-center justify-between px-6 py-2 md:px-12 lg:px-20">
+        <div className="flex items-center gap-2 overflow-x-auto py-1">
+          {filters.length === 0 ? (
+            <span className="text-muted-foreground">All watches</span>
+          ) : (
+            filters.map((f) => (
+              <Link
+                key={f.key}
+                href={f.removeHref}
+                className={badgeVariants({ className: "normal-case" })}
+              >
+                <span>{f.label}</span>
+                <X className="size-3" />
+              </Link>
+            ))
+          )}
+        </div>
+        <span className="shrink-0 text-muted-foreground">{resultLabel}</span>
       </div>
-      <span className="shrink-0 text-muted-foreground">{resultLabel}</span>
     </section>
   );
 }
