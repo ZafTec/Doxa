@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import type { S3Client } from 'bun';
 import { PrismaService } from '../prisma/prisma.service';
-import { INTERNAL_S3, PUBLIC_S3_SIGNER } from './asset-storage.providers';
+import { INTERNAL_S3, PUBLIC_S3_SIGNER } from './asset-storage.tokens';
 import { assetKeyBelongsToVariant, buildAssetKey } from './asset-key.util';
 import { assertPublicHttpUrl } from './asset-url-guard';
 import {
