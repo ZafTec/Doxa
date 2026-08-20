@@ -32,8 +32,22 @@ export default async function AdminItemsPage() {
               <tr key={item.id} className="border-b border-border">
                 <td className="py-3 pr-4 font-medium">{item.brand}</td>
                 <td className="py-3 pr-4 text-muted-foreground">{item.description}</td>
-                <td className="py-3 pr-4 tabular-nums text-muted-foreground">
-                  {item.itemVariants?.length ?? 0}
+                <td className="py-3 pr-4 text-muted-foreground">
+                  {item.itemVariants?.length ? (
+                    <div className="flex flex-wrap gap-x-3 gap-y-1">
+                      {item.itemVariants.map((variant) => (
+                        <Link
+                          key={variant.id}
+                          href={`/admin/items/${item.id}/variants/${variant.id}/assets`}
+                          className="underline decoration-border decoration-1 underline-offset-4 transition-colors hover:text-foreground hover:decoration-foreground"
+                        >
+                          {variant.color}
+                        </Link>
+                      ))}
+                    </div>
+                  ) : (
+                    "0"
+                  )}
                 </td>
                 <td className="py-3 pr-4 text-right">
                   <Link

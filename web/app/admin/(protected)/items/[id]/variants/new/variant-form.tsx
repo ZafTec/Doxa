@@ -20,8 +20,8 @@ export function VariantForm({ itemId }: { itemId: string }) {
   const onSubmit = handleSubmit(async (values) => {
     setFormError(null);
     try {
-      await itemsClientApi.createVariant({ ...values, itemId });
-      router.push("/admin/items");
+      const variant = await itemsClientApi.createVariant({ ...values, itemId });
+      router.push(`/admin/items/${itemId}/variants/${variant.id}/assets`);
       router.refresh();
     } catch (err) {
       setFormError(ApiError.fromUnknown(err).message);
