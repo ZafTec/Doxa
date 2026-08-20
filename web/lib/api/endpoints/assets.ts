@@ -1,6 +1,5 @@
 import "server-only";
 import { serverApi } from "../server";
-import type { CreateAssetPayload } from "./types";
 
 export const assetTags = {
   byVariant: (variantId: string) => `asset:variant:${variantId}`,
@@ -12,7 +11,4 @@ export const assetsApi = {
       revalidate: opts?.revalidate ?? 60,
       tags: [assetTags.byVariant(variantId)],
     }),
-
-  create: (payload: CreateAssetPayload) =>
-    serverApi.post<{ message: string }>("/asset/create", payload),
 };
