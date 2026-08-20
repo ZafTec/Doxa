@@ -51,11 +51,20 @@ model ItemVariant {
 }
 
 model Asset {
-    id String @id @default(uuid())
-    url String
+    id            String   @id @default(uuid())
+    /// MinIO object key. Null for legacy externally-hosted assets that
+    /// predate the S3 migration; always set for uploads going forward.
+    key           String?  @unique
+    url           String
+    originalName  String?
+    contentType   String?
+    size          Int?
+    etag          String?
+    position      Int      @default(0)
     itemVariantId String
+    createdAt     DateTime @default(now())
 
-    itemVariant ItemVariant @relation(fields:[itemVariantId], references:[id])
+    itemVariant ItemVariant @relation(fields: [itemVariantId], references: [id], onDelete: Cascade)
 }
 
 enum AdminRole {
