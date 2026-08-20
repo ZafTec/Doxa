@@ -25,7 +25,7 @@ Ecommerce storefront. Watches first, additional categories later. Backend (separ
 | Forms          | react-hook-form + zod (`@hookform/resolvers/zod`) |
 | HTTP (client)  | axios                                     |
 | HTTP (server)  | native `fetch` (Next-extended)            |
-| Images         | `next/image` + Cloudinary                 |
+| Images         | `next/image` + MinIO (S3-compatible)      |
 
 ## Data fetching - read this before writing any fetch code
 
@@ -172,9 +172,15 @@ never use `bg-[var(--background)]` arbitrary syntax.
 
 ## Images & CDN
 
-- Cloudinary is the canonical image host. Configured via `images.remotePatterns` in `next.config.ts` for `https://res.cloudinary.com/**`.
-- `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` will hold the account name when set up; URL building helpers go in `lib/cloudinary/` when needed.
-- Always use `next/image` for product imagery - never raw `<img>`.
+- MinIO (S3-compatible, on the shared VPS) is the canonical image host. Configured via
+  `images.remotePatterns` in `next.config.ts` for `https://storage.zaftech.co/doxa-assets/**`
+  (plus a `localhost:9000` pattern for dev against a local MinIO container). Product images
+  are uploaded through the admin asset-manager UI - see `docs/s3-assets-implementation-guide.md`.
+- Legacy Cloudinary/Google-hosted placeholder patterns remain in `next.config.ts` for
+  pre-migration seed data (`Asset.key === null`); drop them once all rows are backfilled.
+- Always use `next/image` for product imagery - never raw `<img>`, except for the throwaway
+  URL-import confirmation preview in the admin asset manager (an arbitrary external host
+  that `next/image` can't optimize).
 
 ## Project layout
 
@@ -202,10 +208,14 @@ web/
       types.ts                ApiResponse / ApiErrorPayload
       endpoints/
         types.ts              Endpoint contracts / Category / AdminUser / Paginated<T>
-        items.ts, categories.ts        Public reads + provisional serverApi creates (server-only)
-        items-client.ts, categories-client.ts   Client-side creates used by admin forms
-        auth.ts, admin-users.ts        Admin reads, server-only, cookie forwarded explicitly
+        items.ts, categories.ts, assets.ts     Public reads + provisional serverApi creates (server-only)
+        items-client.ts, categories-client.ts, assets-client.ts   Client-side mutations used by admin forms
+        auth.ts, admin-users.ts, assets-admin.ts   Admin reads, server-only, cookie forwarded explicitly
         auth-client.ts, admin-users-client.ts    Admin mutations via client.ts axios
+    upload/
+      use-asset-uploads.ts     File-upload state machine (presign -> PUT -> complete),
+                                2x concurrency, byte-weighted overall progress
+      use-asset-url-imports.ts Same lifecycle for the "add from URL" admin flow
     store/                    Zustand stores (cart, ui)
     validation/               useZodForm + shared zod schemas + admin-schemas.ts
 ```
@@ -218,12 +228,11 @@ web/
 
 ## Open questions / TODO
 
-**Backend-side (tracked here because the web blocks on them):**
+**Backend-side:**
 
-- Implement the object-storage contract described in `docs/s3-assets-implementation-guide.md` while preserving per-variant assets in `ItemDetails`.
 - Decide whether the parent `Item` needs its own customer-facing title or whether variant names remain canonical.
+- Backfill legacy seed `Asset` rows (`key === null`) into MinIO, or accept they stay externally hosted indefinitely.
 
 **Web-side:**
 
-- Cloudinary URL helper once `CLOUDINARY_CLOUD_NAME` is set.
 - Decide whether to adopt TanStack Query for client mutations later; current default is RSC reads + axios point mutations.
