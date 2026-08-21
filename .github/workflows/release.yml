@@ -1,0 +1,68 @@
+name: Release
+
+# Cutting a release is a deliberate act: push a semver tag (v1.2.3). This
+# never runs on an ordinary push to main.
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  ci:
+    name: CI
+    uses: ./.github/workflows/ci.yml
+
+  docker:
+    name: Build and push Docker images
+    needs: ci
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve version from tag
+        id: version
+        run: echo "value=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./nest-backend
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/doxa-backend:${{ steps.version.outputs.value }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/doxa-backend:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push web image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./web
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/doxa-web:${{ steps.version.outputs.value }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/doxa-web:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          # NEXT_PUBLIC_* vars are baked into the client bundle at build time
+          # (see web/Dockerfile) - set these as repo Variables (not secrets,
+          # they're public) once the real production domain/API URL exist,
+          # then reference them here as ${{ vars.NEXT_PUBLIC_SITE_URL }} etc.
+          # Until then the image builds with the Dockerfile's localhost defaults.
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          generate_release_notes: true
