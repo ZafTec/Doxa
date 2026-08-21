@@ -62,6 +62,32 @@ bun run lint      # Check frontend source
 bun run lint:fix  # Apply lint fixes
 ```
 
+## Git hooks
+
+A pre-commit hook (Husky + lint-staged) runs the relevant app's lint (and, for
+`web`, a typecheck) on every commit, scoped to whichever app you changed. It
+activates once you install dependencies at the **repo root**:
+
+```bash
+bun install
+```
+
+## CI/CD
+
+GitHub Actions workflows live in `.github/workflows/`:
+
+- **`ci.yml`** - runs on every pull request and push to `main`: lints, builds,
+  and tests both apps (`nest-backend` against a real Postgres service
+  container, including e2e; `web` via typecheck + lint + build).
+- **`release.yml`** - runs when a `v*.*.*` tag is pushed: re-runs CI, then
+  builds and pushes Docker images for both apps to Docker Hub
+  (`<username>/doxa-backend`, `<username>/doxa-web`) and cuts a GitHub Release
+  with auto-generated notes.
+
+Releasing requires two repo secrets (Settings -> Secrets and variables ->
+Actions): `DOCKERHUB_USERNAME` and a `DOCKERHUB_TOKEN` (access token, not your
+password).
+
 ## Editor configuration
 
 Repository-specific Zed settings live in `.zed/settings.json` and configure the TypeScript language server to use the workspace TypeScript SDK.
