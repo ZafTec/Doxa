@@ -3,6 +3,7 @@ import { Mona_Sans, Geist_Mono } from "next/font/google";
 import { MotionConfig } from "motion/react";
 import "./globals.css";
 import { ThemeEffect } from "./components/theme-effect";
+import { absoluteUrl, siteConfig } from "@/lib/seo/config";
 
 const monaSans = Mona_Sans({
   variable: "--font-sans",
@@ -17,8 +18,32 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Doxa - Watches",
-  description: "Editorial watches storefront.",
+  metadataBase: new URL(siteConfig.url),
+  title: {
+    default: siteConfig.defaultTitle,
+    template: siteConfig.titleTemplate,
+  },
+  description: siteConfig.description,
+  keywords: [...siteConfig.baseKeywords],
+  openGraph: {
+    siteName: siteConfig.name,
+    title: siteConfig.defaultTitle,
+    description: siteConfig.description,
+    url: siteConfig.url,
+    type: "website",
+    locale: "en_US",
+    images: [{ url: absoluteUrl(siteConfig.ogImagePath), width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: siteConfig.defaultTitle,
+    description: siteConfig.description,
+    images: [absoluteUrl(siteConfig.ogImagePath)],
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({
