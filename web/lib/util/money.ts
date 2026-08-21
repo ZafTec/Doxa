@@ -3,7 +3,7 @@
  * Never accept floats - backend stores ItemVariant.price as `Int`.
  */
 
-const DEFAULT_CURRENCY = "USD";
+export const DEFAULT_CURRENCY = "USD";
 
 export function formatPrice(minorUnits: number, currency = DEFAULT_CURRENCY): string {
   const major = minorUnits / 100;
