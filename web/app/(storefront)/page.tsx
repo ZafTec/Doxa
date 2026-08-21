@@ -1,13 +1,41 @@
+import type { Metadata } from "next";
 import { categoriesApi, itemsApi } from "@/lib/api";
 import { HeroBand } from "@/app/components/catalog/hero-band";
 import { FilterBar, type ActiveFilter } from "@/app/components/catalog/filter-bar";
 import { FilterControls } from "@/app/components/catalog/filter-controls";
 import { CatalogGrid } from "@/app/components/catalog/catalog-grid";
 import { Pagination } from "@/app/components/catalog/pagination";
+import { absoluteUrl, siteConfig } from "@/lib/seo/config";
 
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
 const PAGE_SIZE = 9;
+
+/**
+ * Keywords grow with the catalog on their own - every brand/category an
+ * admin adds becomes a search term here without touching this file again.
+ * `?brand=`/`?category=` filter variations all canonicalize back to `/` so
+ * ranking signal doesn't split across near-duplicate filtered URLs.
+ */
+export async function generateMetadata(): Promise<Metadata> {
+  const [categoryRows, brandsResult] = await Promise.all([
+    categoriesApi.list().catch(() => []),
+    itemsApi.list({ pageSize: 100 }).catch(() => null),
+  ]);
+
+  const keywords = Array.from(
+    new Set([
+      ...siteConfig.baseKeywords,
+      ...categoryRows.map((c) => c.name),
+      ...uniqueBrands(brandsResult?.data ?? []),
+    ]),
+  );
+
+  return {
+    keywords,
+    alternates: { canonical: absoluteUrl("/") },
+  };
+}
 
 export default async function HomePage({
   searchParams,
