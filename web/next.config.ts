@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Minimal, self-contained server bundle for the Docker release image
+  // (.next/standalone) - see web/Dockerfile.
+  output: "standalone",
   experimental: {
     viewTransition: true,
   },
