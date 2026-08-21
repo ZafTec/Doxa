@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { Minus, Plus, X } from "lucide-react";
+import { Minus, Plus, Trash2, X } from "lucide-react";
 import { useCartStore, useUiStore, type CartLine } from "@/lib/store";
 import { formatPrice } from "@/lib/util/money";
 import { useHasMounted } from "@/lib/util/use-has-mounted";
@@ -21,12 +22,27 @@ export function CartDrawer() {
   const rawLines = useCartStore((s) => s.lines);
   const rawSubtotal = useCartStore((s) => s.subtotal());
   const rawTotalItems = useCartStore((s) => s.totalItems());
+  const removeLine = useCartStore((s) => s.remove);
   // Server always renders an empty cart; only trust the persisted lines once
   // mounted, or the real count/subtotal would diverge from the SSR markup.
   const mounted = useHasMounted();
   const lines = mounted ? rawLines : [];
   const subtotal = mounted ? rawSubtotal : 0;
   const totalItems = mounted ? rawTotalItems : 0;
+
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const [announcement, setAnnouncement] = useState("");
+
+  // Removing a row's own button would otherwise drop focus to <body> and
+  // leave screen-reader users with no spoken confirmation the item is gone.
+  // The close button is the one control that's always present, empty cart
+  // or not, so it's a safe, predictable place to land the focus; the live
+  // region covers users who aren't watching focus move at all.
+  function handleRemove(line: CartLine) {
+    removeLine(line.variantId);
+    setAnnouncement(`Removed ${line.brand} ${line.description} from bag.`);
+    closeButtonRef.current?.focus();
+  }
 
   return (
     <>
@@ -54,7 +70,12 @@ export function CartDrawer() {
               {totalItems} {totalItems === 1 ? "item" : "items"}
             </p>
           </div>
-          <IconButton size="sm" onClick={() => setOpen(false)} aria-label="Close bag">
+          <IconButton
+            ref={closeButtonRef}
+            size="sm"
+            onClick={() => setOpen(false)}
+            aria-label="Close bag"
+          >
             <X className="size-5" />
           </IconButton>
         </header>
@@ -66,11 +87,17 @@ export function CartDrawer() {
             <ul className="divide-y divide-border">
               <AnimatePresence initial={false}>
                 {lines.map((line) => (
-                  <CartRow key={line.variantId} line={line} />
+                  <CartRow key={line.variantId} line={line} onRemove={handleRemove} />
                 ))}
               </AnimatePresence>
             </ul>
           )}
+        </div>
+
+        {/* Screen-reader-only: announces removals for users who won't see
+            the row disappear or notice focus land on the close button. */}
+        <div role="status" aria-live="polite" className="sr-only">
+          {announcement}
         </div>
 
         {lines.length > 0 && (
@@ -109,9 +136,14 @@ function EmptyCart() {
   );
 }
 
-function CartRow({ line }: { line: CartLine }) {
+function CartRow({
+  line,
+  onRemove,
+}: {
+  line: CartLine;
+  onRemove: (line: CartLine) => void;
+}) {
   const setQuantity = useCartStore((s) => s.setQuantity);
-  const remove = useCartStore((s) => s.remove);
   const lineTotal = line.unitPrice * line.quantity;
 
   return (
@@ -178,11 +210,11 @@ function CartRow({ line }: { line: CartLine }) {
 
       <IconButton
         size="sm"
-        onClick={() => remove(line.variantId)}
-        aria-label="Remove from bag"
+        onClick={() => onRemove(line)}
+        aria-label={`Remove ${line.brand} ${line.description} from bag`}
         className="self-start text-muted-foreground hover:text-foreground"
       >
-        <X className="size-4" />
+        <Trash2 className="size-4" />
       </IconButton>
     </motion.li>
   );
