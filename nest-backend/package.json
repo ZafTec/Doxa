@@ -88,7 +88,8 @@
     "rootDir": "src",
     "testRegex": ".*\\.spec\\.ts$",
     "moduleNameMapper": {
-      "^(\\.{1,2}/.*)\\.js$": "$1"
+      "^(\\.{1,2}/.*)\\.js$": "$1",
+      "^bun$": "<rootDir>/../test/__mocks__/bun.ts"
     },
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
